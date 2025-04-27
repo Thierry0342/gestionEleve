@@ -1,0 +1,16 @@
+import React from 'react';
+import { Route } from 'react-router-dom';
+import HomePage from '../pages/homePage';
+import ElevePage from '../pages/ElevePage/ElevePage';
+
+const AppRoutes = () => {
+  return (
+    <>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/eleve" element={<ElevePage />} />
+     
+    </>
+  );
+};
+
+export default AppRoutes;
