@@ -26,9 +26,10 @@ const ElevePage = () => {
       contact: { nom: '', adresse: '', phone: '' },
       enfants: [
         { nom: '', prenom: '', dateNaissance: '', sexe: '' },
-        { nom: '', prenom: '', dateNaissance: '', sexe: '' },
-        { nom: '', prenom: '', dateNaissance: '', sexe: '' },
+       
       ],
+      soeur: [{nom: ''}],
+      frere: [{nom: ''}],
     },
     image :"",
     etatCivil: '',
@@ -44,7 +45,88 @@ const ElevePage = () => {
   const [showFamille, setShowFamille] = useState(false); // Etat pour afficher/masquer la section famille
 
   const [imagePreview, setImagePreview] = useState(''); // Pour afficher l'image sélectionnée
-  /////
+  ///// ajouter nouveau efant e
+  const ajouterEnfant = () => {
+    setFormData((prev) => ({
+      ...prev,
+      famille: {
+        ...prev.famille,
+        enfants: [...prev.famille.enfants, { nom: '', prenom: '', dateNaissance: '', sexe: '' }],
+      },
+    }));
+  };
+  //suprime formulaire efant 
+  const supprimerEnfant = (index) => {
+    setFormData((prevState) => {
+      const enfants = [...prevState.famille.enfants];
+      enfants.splice(index, 1); // Supprime l'enfant à l'index donné
+  
+      return {
+        ...prevState,
+        famille: {
+          ...prevState.famille,
+          enfants,
+        },
+      };
+    });
+  };
+  // fomulaire soeur et frere
+  // Fonction pour ajouter un frère
+  const ajouterFrere = () => {
+    setFormData((prev) => ({
+      ...prev,
+      famille: {
+        ...prev.famille,
+        frere: [...prev.famille.frere, { nom: '', }],
+      },
+    }));
+  };
+  //suprim
+
+// Fonction pour ajouter une soeur
+const ajouterSoeur = () => {
+  setFormData((prev) => ({
+    ...prev,
+    famille: {
+      ...prev.famille,
+      soeur: [...prev.famille.soeur, { nom: '' }],
+    },
+  }));
+};
+//suprim
+// Fonction pour supprimer un frère
+const supprimerFrere = (index) => {
+  setFormData((prevState) => {
+    const frere = [...prevState.famille.frere];
+    frere.splice(index, 1); // Supprime l'enfant à l'index donné
+
+    return {
+      ...prevState,
+      famille: {
+        ...prevState.famille,
+        frere,
+      },
+    };
+  });
+};
+// Fonction pour supprimer une soeur
+const supprimerSoeur = (index) => {
+  setFormData((prevState) => {
+    const soeur = [...prevState.famille.soeur];
+    soeur.splice(index, 1); // Supprime l'enfant à l'index donné
+
+    return {
+      ...prevState,
+      famille: {
+        ...prevState.famille,
+        soeur,
+      },
+    };
+  });
+};
+
+  
+  
    // Fonction pour gérer l'importation de l'image
    const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -64,22 +146,46 @@ const ElevePage = () => {
   const handleChange = (e, index = null) => {
     const { name, value } = e.target;
 
-    if (name.startsWith('famille.enfants') && index !== null) {
-      const fieldName = name.split('.').pop();
-
-      setFormData(prevState => {
-        const updatedEnfants = [...prevState.famille.enfants];
-        updatedEnfants[index][fieldName] = value;
-
-        return {
-          ...prevState,
-          famille: {
-            ...prevState.famille,
-            enfants: updatedEnfants,
-          },
-        };
-      });
-    } else if (name.startsWith('famille.')) {
+    if (name.startsWith('famille.enfants')) {
+      const field = name.split('.')[2]; // e
+      const newEnfants = [...formData.famille.enfants];
+      newEnfants[index][field] = value;
+  
+      setFormData((prev) => ({
+        ...prev,
+        famille: {
+          ...prev.famille,
+          enfants: newEnfants,
+        },
+      }));
+    } 
+    else if  (name.startsWith('famille.soeur')) {
+      const field = name.split('.')[2]; // 
+      const newSoeur = [...formData.famille.soeur];
+      newSoeur[index][field] = value;
+  
+      setFormData((prev) => ({
+        ...prev,
+        famille: {
+          ...prev.famille,
+          soeur: newSoeur,
+        },
+      }));
+    } 
+    else if  (name.startsWith('famille.frere')) {
+      const field = name.split('.')[2]; // 
+      const newFrere = [...formData.famille.frere];
+      newFrere[index][field] = value;
+  
+      setFormData((prev) => ({
+        ...prev,
+        famille: {
+          ...prev.famille,
+          frere: newFrere,
+        },
+      }));
+    } 
+    else if (name.startsWith('famille.')) {
       const path = name.split('.');
       setFormData(prevState => ({
         ...prevState,
@@ -91,7 +197,7 @@ const ElevePage = () => {
           },
         },
       }));
-    } else {
+    } else  {
       setFormData(prevState => ({
         ...prevState,
         [name]: value,
@@ -512,57 +618,131 @@ const ElevePage = () => {
     />
   </div>
 </div>
+{formData.famille.enfants.map((enfant, index) => (
+  <div key={index} className="row mb-4 align-items-end">
+    <div className="col-md-3">
+      <label className="form-label">Nom enfant {index + 1}</label>
+      <input
+        type="text"
+        name="famille.enfants.nom"
+        className="form-control"
+        value={enfant.nom}
+        onChange={(e) => handleChange(e, index)}
+        placeholder="Nom"
+      />
+    </div>
+    <div className="col-md-3">
+      <label className="form-label">Date de naissance</label>
+      <input
+        type="date"
+        name="famille.enfants.dateNaissance"
+        className="form-control"
+        value={enfant.dateNaissance}
+        onChange={(e) => handleChange(e, index)}
+      />
+    </div>
+    <div className="col-md-3">
+      <label className="form-label">Sexe</label>
+      <select
+        name="famille.enfants.sexe"
+        className="form-select"
+        value={enfant.sexe}
+        onChange={(e) => handleChange(e, index)}
+      >
+        <option value="">Sélectionner</option>
+        <option value="masculin">Masculin</option>
+        <option value="féminin">Féminin</option>
+      </select>
+    </div>
+    <div className="col-md-3 text-end">
+      <button
+        type="button"
+        className="btn btn-outline-danger mt-4"
+        onClick={() => supprimerEnfant(index)}
+        title="Supprimer cet enfant"
+      >
+        🗑️
+      </button>
+    </div>
+  </div>
+))}
 
+       {/* btn ajout formulaire enfant*/}
+       <button type="button" className="btn btn-primary mb-3" onClick={ajouterEnfant}>
+          Formulaire enfant
+        </button>
 
-            
+        <div className="row mb-4">
+  {/* Formulaire Frère */}
+  {formData.famille.frere.map((frere, index) => (
+    <div key={index} className="col-md-5">
+      <label className="form-label">Nom Frère {index + 1}</label>
+      <input
+        type="text"
+        name={`famille.frere[${index}].nom`}
+        className="form-control"
+        value={frere.nom}
+        onChange={(e) => handleChange(e, index, "frere")}
+        placeholder="Nom du frère"
+      />
+      <div className="text-end">
+        <button
+          type="button"
+          className="btn btn-outline-danger mt-2"
+          onClick={() => supprimerFrere(index)}
+        >
+          🗑️
+        </button>
+      </div>
+    </div>
+  ))}
+  <button
+    type="button"
+    className="btn btn-outline-primary mt-3"
+    onClick={ajouterFrere}
+  >
+    Ajouter un frère
+  </button>
+  
+  {/* Formulaire Soeur */}
+  {formData.famille.soeur.map((soeur, index) => (
+    <div key={index} className="col-md-5">
+      <label className="form-label">Nom Soeur {index + 1}</label>
+      <input
+        type="text"
+        name={`famille.soeur[${index}].nom`}
+        className="form-control"
+        value={soeur.nom}
+        onChange={(e) => handleChange(e, index, "soeur")}
+        placeholder="Nom du soeur"
+      />
+      <div className="text-end">
+        <button
+          type="button"
+          className="btn btn-outline-danger mt-2"
+          onClick={() => supprimerSoeur(index)}
+        >
+          🗑️
+        </button>
+      </div>
+    </div>
+  ))}
+  <button
+    type="button"
+    className="btn btn-outline-primary mt-3"
+    onClick={ajouterSoeur}
+  >
+    Ajouter une soeur
+  </button>
+</div>
 
-            {formData.famille.enfants.map((enfant, index) => (
-              <div key={index} className="row mb-3">
-                <div className="col-md-3">
-                  <label className="form-label">Nom  prenom enfant {index + 1}</label>
-                  <input
-                    type="text"
-                    name={`famille.enfants[${index}].nom`}
-                    className="form-control"
-                    value={enfant.nom || ''}
-                    onChange={(e) => handleChange(e, index)}
-                    placeholder="Nom de l'enfant"
-                  />
-                </div>
-             
-                <div className="col-md-3">
-                  <label className="form-label">Date de naissance</label>
-                  <input
-                    type="date"
-                    name={`famille.enfants[${index}].dateNaissance`}
-                    className="form-control"
-                    value={enfant.dateNaissance || ''}
-                    onChange={(e) => handleChange(e, index)}
-                  />
-                </div>
-                <div className="col-md-3">
-                  <label className="form-label">Sexe</label>
-                  <select
-                    name={`famille.enfants[${index}].sexe`}
-                    className="form-select"
-                    value={enfant.sexe || ''}
-                    onChange={(e) => handleChange(e, index)}
-                  >
-                    <option value="">Sélectionner</option>
-                    <option value="masculin">Masculin</option>
-                    <option value="féminin">Féminin</option>
-                  </select>
-                </div>
-                
-              </div>
-              
-            ))
-            
-            }
+      
           </div>
+          
           
         
         )}
+
         
         
          <button
