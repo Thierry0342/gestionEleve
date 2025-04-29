@@ -1,7 +1,7 @@
 import axios from "axios";
 import { API_URL } from "../config/root/modules";
 //import { header } from "./Auth.services";
-class createEleve {
+class EleveService  {
     get(){
         return axios.get(API_URL + "/eleves");
     }
@@ -17,4 +17,4 @@ class createEleve {
     }
 }
 
-export default new createEleve()
+export default new EleveService ()

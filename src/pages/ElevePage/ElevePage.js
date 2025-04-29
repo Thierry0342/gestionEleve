@@ -30,12 +30,37 @@ const ElevePage = () => {
         { nom: '', prenom: '', dateNaissance: '', sexe: '' },
       ],
     },
-    image :""
+    image :"",
+    etatCivil: '',
+    eleveTelephone: {
+      telephone1: '',
+      telephone2: '',
+      telephone3: '',},
+    facebook:"",
+
+    
   });
 
   const [showFamille, setShowFamille] = useState(false); // Etat pour afficher/masquer la section famille
-  
+
   const [imagePreview, setImagePreview] = useState(''); // Pour afficher l'image sélectionnée
+  /////
+   // Fonction pour gérer l'importation de l'image
+   const handleImageChange = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result); // Met à jour l'aperçu de l'image
+        setFormData({
+          ...formData,
+          image: file, // Stocke le fichier de l'image
+        });
+      };
+      reader.readAsDataURL(file); // Lecture du fichier comme URL
+    }
+  };
   const handleChange = (e, index = null) => {
     const { name, value } = e.target;
 
@@ -98,9 +123,30 @@ const ElevePage = () => {
   return (
     <div className="container mt-5">
       <h2 className="text-center mb-4">Ajouter un Élève</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}
+      >
+        <div className="col">
+        {/* Champ pour télécharger l'image */}
+        <input
+          type="file"
+          className="form-control"
+          name="image"
+          onChange={handleImageChange}
+        />
+      </div>
+
+      <div className="col">
+        {/* Affichage de l'image ou image par défaut */}
+        <img
+          src={imagePreview || 'logo192.png'} // Image par défaut si aucune image sélectionnée
+          alt="Aperçu"
+          className="img-thumbnail"
+          width="150"
+        />
+      </div>
         
         {/* Ligne 1 */}
+        
         <div className="row mb-3">
           <div className="col">
             <input type="text" className="form-control" name="numCandidature" placeholder="Numéro de candidature" value={formData.numCandidature} onChange={handleChange} />
@@ -224,6 +270,117 @@ const ElevePage = () => {
             <input type="text" className="form-control" name="duplicata" placeholder="Duplicata (si applicable)" value={formData.duplicata} onChange={handleChange} />
           </div>
         </div>
+        <div className="mb-3">
+             {/* checkbox ici e */}
+  <label className="form-label">Situation de famille:</label>
+  <div className="d-flex gap-3">
+    <div className="form-check">
+      <input
+        className="form-check-input"
+        type="checkbox"
+        name="etatCivil"
+        value="Célibataire"
+        checked={formData.etatCivil === "Célibataire"}
+        onChange={() => setFormData({ ...formData, etatCivil: "Celibataire" })}
+      />
+      <label className="form-check-label">
+        Célibataire
+      </label>
+    </div>
+
+    <div className="form-check">
+      <input
+        className="form-check-input"
+        type="checkbox"
+        name="etatCivil"
+        value="Marié(e)"
+        checked={formData.etatCivil === "Marié(e)"}
+        onChange={() => setFormData({ ...formData, etatCivil: "Marie" })}
+      />
+      <label className="form-check-label">
+        Marié(e)
+      </label>
+    </div>
+
+    <div className="form-check">
+      <input
+        className="form-check-input"
+        type="checkbox"
+        name="etatCivil"
+        value="Divorcé(e)"
+        checked={formData.etatCivil === "Divorcé(e)"}
+        onChange={() => setFormData({ ...formData, etatCivil: "Divorce" })}
+      />
+      <label className="form-check-label">
+        Divorcé(e)
+      </label>
+    </div>
+  </div>
+</div>
+ {/* nimero phone */}
+        
+ <div className="d-flex gap-3 mb-3">
+ <input
+  type="text"
+  className="form-control"
+  placeholder="Téléphone 1"
+  maxLength="11"
+  value={formData.eleveTelephone.telephone1}
+  onChange={(e) => {
+    const newValue = e.target.value.replace(/\D/g, '').slice(0, 11); // On autorise que les chiffres, 11 max
+    setFormData({
+      ...formData,
+      eleveTelephone: {
+        ...formData.eleveTelephone,
+        telephone1: newValue
+      }
+    });
+  }}
+/>
+
+<input
+  type="text"
+  className="form-control"
+  placeholder="Téléphone 2"
+  maxLength="10"
+  value={formData.eleveTelephone.telephone2}
+  onChange={(e) => {
+    const newValue = e.target.value.replace(/\D/g, '').slice(0, 11); // On autorise que les chiffres, 11 max
+    setFormData({
+      ...formData,
+      eleveTelephone: {
+        ...formData.eleveTelephone,
+        telephone2: newValue
+      }
+    });
+  }}
+/>
+<input
+  type="text"
+  className="form-control"
+  placeholder="Téléphone 3"
+  maxLength="10"
+  value={formData.eleveTelephone.telephone3}
+  onChange={(e) => {
+    const newValue = e.target.value.replace(/\D/g, '').slice(0, 11); // On autorise que les chiffres, 11 max
+    setFormData({
+      ...formData,
+      eleveTelephone: {
+        ...formData.eleveTelephone,
+        telephone3: newValue
+      }
+    });
+  }}
+/>
+</div>
+         <div className="col">
+            <input type="text" className="form-control" name="facebook" placeholder="facebook" value={formData.facebook} onChange={handleChange} />
+          </div>
+
+
+      
+
+       
 
         {/* Bouton pour afficher/masquer la section famille */}
         <div className="text-center mb-3">
@@ -235,91 +392,134 @@ const ElevePage = () => {
         {/* Informations de la Famille */}
         {showFamille && (
           <div className="mt-4 border p-4">
-            <h4>Informations Membres de Famille</h4>
+            <h4>INFORMATION SUR LES MEMBRES DE FAMILLE</h4>
 
             {/* Conjointe */}
             <div className="row mb-3">
-              <div className="col-md-6">
-                <label className="form-label">Nom et Prénom Conjointe</label>
-                <input
-                  type="text"
-                  name="famille.conjointe.nom"
-                  className="form-control"
-                  value={formData.famille.conjointe.nom}
-                  onChange={handleChange}
-                  placeholder="Nom et Prénom de la conjointe"
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Téléphone Conjointe</label>
-                <input
-                  type="text"
-                  name="famille.conjointe.phone"
-                  className="form-control"
-                  value={formData.famille.conjointe.phone}
-                  onChange={handleChange}
-                  placeholder="Téléphone"
-                />
-              </div>
-            </div>
+  <div className="col-md-4">
+    <label className="form-label">Nom et Prénom Conjointe</label>
+    <input
+      type="text"
+      name="famille.conjointe.nom"
+      className="form-control"
+      value={formData.famille.conjointe.nom}
+      onChange={handleChange}
+      placeholder="Nom et Prénom de la conjointe"
+    />
+  </div>
+  
+  <div className="col-md-4">
+    <label className="form-label">Téléphone</label>
+    <input
+      type="text"
+      name="famille.conjointe.phone"
+      className="form-control"
+      value={formData.famille.conjointe.phone}
+      onChange={handleChange}
+      placeholder="Téléphone"
+    />
+  </div>
+  
+  <div className="col-md-4">
+    <label className="form-label">Adresse</label>
+    <input
+      type="text"
+      name="famille.conjointe.adresse"
+      className="form-control"
+      value={formData.famille.conjointe.adresse}
+      onChange={handleChange}
+      placeholder="Adresse"
+    />
+  </div>
+</div>
+
 
             {/* Père */}
             <div className="row mb-3">
-              <div className="col-md-6">
-                <label className="form-label">Nom et Prénom Père</label>
-                <input
-                  type="text"
-                  name="famille.pere.nom"
-                  className="form-control"
-                  value={formData.famille.pere.nom}
-                  onChange={handleChange}
-                  placeholder="Nom et Prénom du père"
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Téléphone Père</label>
-                <input
-                  type="text"
-                  name="famille.pere.phone"
-                  className="form-control"
-                  value={formData.famille.pere.phone}
-                  onChange={handleChange}
-                  placeholder="Téléphone du père"
-                />
-              </div>
-            </div>
+  <div className="col-md-4">
+    <label className="form-label">Nom et Prénom pére</label>
+    <input
+      type="text"
+      name="famille.pere.nom"
+      className="form-control"
+      value={formData.famille.pere.nom}
+      onChange={handleChange}
+      placeholder="Nom et Prénom pére"
+    />
+  </div>
+  
+  <div className="col-md-4">
+    <label className="form-label">Téléphone</label>
+    <input
+      type="text"
+      name="famille.pere.phone"
+      className="form-control"
+      value={formData.famille.pere.phone}
+      onChange={handleChange}
+      placeholder="Téléphone"
+    />
+  </div>
+  
+  <div className="col-md-4">
+    <label className="form-label">Adresse</label>
+    <input
+      type="text"
+      name="famille.pere.adresse"
+      className="form-control"
+      value={formData.famille.pere.adresse}
+      onChange={handleChange}
+      placeholder="Adresse"
+    />
+  </div>
+</div>
+
 
             {/* Mère */}
             <div className="row mb-3">
-              <div className="col-md-6">
-                <label className="form-label">Nom et Prénom Mère</label>
-                <input
-                  type="text"
-                  name="famille.mere.nom"
-                  className="form-control"
-                  value={formData.famille.mere.nom}
-                  onChange={handleChange}
-                  placeholder="Nom et Prénom de la mère"
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Téléphone Mère</label>
-                <input
-                  type="text"
-                  name="famille.mere.phone"
-                  className="form-control"
-                  value={formData.famille.mere.phone}
-                  onChange={handleChange}
-                  placeholder="Téléphone de la mère"
-                />
-              </div>
-            </div>
+  <div className="col-md-4">
+    <label className="form-label">Nom et Prénom mére</label>
+    <input
+      type="text"
+      name="famille.mére.nom"
+      className="form-control"
+      value={formData.famille.mere.nom}
+      onChange={handleChange}
+      placeholder="Nom et Prénom mere"
+    />
+  </div>
+  
+  <div className="col-md-4">
+    <label className="form-label">Téléphone</label>
+    <input
+      type="text"
+      name="famille.mere.phone"
+      className="form-control"
+      value={formData.famille.mere.phone}
+      onChange={handleChange}
+      placeholder="Téléphone"
+    />
+  </div>
+  
+  <div className="col-md-4">
+    <label className="form-label">Adresse</label>
+    <input
+      type="text"
+      name="famille.mere.adresse"
+      className="form-control"
+      value={formData.famille.mere.adresse}
+      onChange={handleChange}
+      placeholder="Adresse"
+    />
+  </div>
+</div>
 
-            {/* ENFANTS */}
+
+            
+
             {formData.famille.enfants.map((enfant, index) => (
               <div key={index} className="row mb-3">
                 <div className="col-md-3">
-                  <label className="form-label">Nom enfant {index + 1}</label>
+                  <label className="form-label">Nom  prenom enfant {index + 1}</label>
                   <input
                     type="text"
                     name={`famille.enfants[${index}].nom`}
@@ -329,17 +529,7 @@ const ElevePage = () => {
                     placeholder="Nom de l'enfant"
                   />
                 </div>
-                <div className="col-md-3">
-                  <label className="form-label">Prénom enfant {index + 1}</label>
-                  <input
-                    type="text"
-                    name={`famille.enfants[${index}].prenom`}
-                    className="form-control"
-                    value={enfant.prenom || ''}
-                    onChange={(e) => handleChange(e, index)}
-                    placeholder="Prénom de l'enfant"
-                  />
-                </div>
+             
                 <div className="col-md-3">
                   <label className="form-label">Date de naissance</label>
                   <input
@@ -363,11 +553,18 @@ const ElevePage = () => {
                     <option value="féminin">Féminin</option>
                   </select>
                 </div>
+                
               </div>
-            ))}
+              
+            ))
+            
+            }
           </div>
+          
+        
         )}
-
+        
+        
          <button
            type="button"  // Utiliser type="button" pour éviter que le formulaire soit soumis
            className="btn btn-primary"
