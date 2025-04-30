@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import eleveService from '../../services/eleveService';
 
@@ -25,6 +24,12 @@ const ElevePage = () => {
     religion:'',
     specialite:'',
     niveau:'',
+    groupeSanguin:'',
+    tailleChemise: "",
+    tourTete: "",
+    pointurePantalon: "",
+    pointureChaussure: "",
+    relationsGenantes: "",
     famille: {
       conjointe: { nom: '', prenom: '', adresse: '', phone: '' },
       pere: { nom: '', prenom: '', adresse: '', phone: '' },
@@ -259,7 +264,7 @@ const ElevePage = () => {
 
         <div className="row">
           {/* Colonne gauche : formulaire principal */}
-          <div className="col-md-8">
+          <div className="col-md-5">
             {/* Ligne 1 */}
 
             <  div className="row mb-3">
@@ -394,8 +399,8 @@ const ElevePage = () => {
                     className="form-check-input"
                     type="checkbox"
                     name="etatCivil"
-                    value="Célibataire"
-                    checked={formData.etatCivil === "Célibataire"}
+                    value="Celibataire"
+                    checked={formData.etatCivil === "Celibataire"}
                     onChange={() => setFormData({ ...formData, etatCivil: "Celibataire" })}
                   />
                   <label className="form-check-label">
@@ -408,8 +413,8 @@ const ElevePage = () => {
                     className="form-check-input"
                     type="checkbox"
                     name="etatCivil"
-                    value="Marié(e)"
-                    checked={formData.etatCivil === "Marié(e)"}
+                    value="Marie"
+                    checked={formData.etatCivil === "Marie"}
                     onChange={() => setFormData({ ...formData, etatCivil: "Marie" })}
                   />
                   <label className="form-check-label">
@@ -422,8 +427,8 @@ const ElevePage = () => {
                     className="form-check-input"
                     type="checkbox"
                     name="etatCivil"
-                    value="Divorcé(e)"
-                    checked={formData.etatCivil === "Divorcé(e)"}
+                    value="Divorce"
+                    checked={formData.etatCivil === "Divorce"}
                     onChange={() => setFormData({ ...formData, etatCivil: "Divorce" })}
                   />
                   <label className="form-check-label">
@@ -494,7 +499,7 @@ const ElevePage = () => {
            
 
             </div>
-            <div className="col-md-4">
+            <div className="col-md-5">
   <div className="card shadow-sm border rounded p-3">
     <h5 className="card-title mb-3">Informations supplémentaires</h5>
 
@@ -558,6 +563,26 @@ const ElevePage = () => {
       ))}
     </div>
     </div>
+      {/* groupe saguin */}
+
+    <div className="mb-3">
+  <label className="form-label">Groupe sanguin</label>
+  <div className="d-flex flex-wrap gap-3">
+    {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((groupeSanguin) => (
+      <div className="form-check form-check-inline" key={groupeSanguin}>
+        <input
+          className="form-check-input"
+          type="radio"
+          name="groupeSanguin"
+          value={groupeSanguin}
+          checked={formData.groupeSanguin === groupeSanguin}
+          onChange={handleChange}
+        />
+        <label className="form-check-label">{groupeSanguin}</label>
+      </div>
+    ))}
+  </div>
+</div>
 
     {/* Niveau d’étude */}
     <div className="mb-3">
@@ -619,11 +644,107 @@ const ElevePage = () => {
         }
       />
     </div>
+    
   )
 )}
 
+<div className="mb-3">
+  <label className="form-label">Relation(s) gênante(s)</label>
+  <textarea
+    className="form-control"
+    name="relationsGenantes"
+    rows="3"
+    placeholder="Toerana tsy tokony hiasana ."
+    value={formData.relationsGenantes}
+    onChange={handleChange}
+  ></textarea>
+</div>
+
+ 
+
+
+  </div>
+
+  
+
+ 
+  
+</div>
+{/* section droite*/}
+
+<div className="col-md-2">
+  <div className="card shadow-sm border rounded p-3">
+    <h6 className="mb-3 text-center">Pointure effets</h6>
+
+    {/* Chemise / T-shirt */}
+    <div className="mb-3">
+      <label className="form-label">Chemise / T-shirt</label>
+      <select
+        className="form-select"
+        name="tailleChemise"
+        value={formData.tailleChemise}
+        onChange={handleChange}
+      >
+        <option value="">Choisir la taille</option>
+        <option value="XS">XS</option>
+        <option value="S">S</option>
+        <option value="M">M</option>
+        <option value="L">L</option>
+        <option value="XL">XL</option>
+        <option value="XXL">XXL</option>
+      </select>
+    </div>
+
+    {/* Tour de tête */}
+    <div className="mb-3">
+      <label className="form-label">Tour de tête (cm)</label>
+      <input
+        type="number"
+        className="form-control"
+        name="tourTete"
+        value={formData.tourTete}
+        onChange={handleChange}
+        min="28"
+        max="60"
+        placeholder="Ex: 40"
+      />
+    </div>
+
+    {/* Pantalon */}
+    <div className="mb-3">
+      <label className="form-label">Pointure pantalon</label>
+      <select
+        className="form-select"
+        name="pointurePantalon"
+        value={formData.pointurePantalon}
+        onChange={handleChange}
+      >
+        <option value="">Choisir</option>
+        {[28,30,34, 36, 38, 40, 42, 44, 46, 48, 50].map((taille) => (
+          <option key={taille} value={taille}>{taille}</option>
+        ))}
+      </select>
+    </div>
+
+    {/* Chaussure */}
+    <div className="mb-3">
+      <label className="form-label">Pointure chaussure</label>
+      <select
+        className="form-select"
+        name="pointureChaussure"
+        value={formData.pointureChaussure}
+        onChange={handleChange}
+      >
+        <option value="">Choisir</option>
+        {[30,34,36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46,47,48,49,50].map((taille) => (
+          <option key={taille} value={taille}>{taille}</option>
+        ))}
+      </select>
+    </div>
   </div>
 </div>
+
+
 
         </div>
 
@@ -725,7 +846,7 @@ const ElevePage = () => {
                 <label className="form-label">Nom et Prénom mére</label>
                 <input
                   type="text"
-                  name="famille.mére.nom"
+                  name="famille.mere.nom"
                   className="form-control"
                   value={formData.famille.mere.nom}
                   onChange={handleChange}
