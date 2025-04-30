@@ -264,7 +264,10 @@ const ElevePage = () => {
 
         <div className="row">
           {/* Colonne gauche : formulaire principal */}
+          
           <div className="col-md-5">
+
+          <div className="card shadow-lg border rounded p-3">
             {/* Ligne 1 */}
 
             <  div className="row mb-3">
@@ -496,11 +499,15 @@ const ElevePage = () => {
             <div className="col">
               <input type="text" className="form-control" name="facebook" placeholder="facebook" value={formData.facebook} onChange={handleChange} />
             </div>
-           
 
+         </div>
+           {/* fin card gauche  */}
+            
+            
+           
             </div>
             <div className="col-md-5">
-  <div className="card shadow-sm border rounded p-3">
+  <div className="card shadow-lg border rounded p-3">
     <h5 className="card-title mb-3">Informations supplémentaires</h5>
 
     {/* Spécialité ou aptitude */}
@@ -673,8 +680,8 @@ const ElevePage = () => {
 {/* section droite*/}
 
 <div className="col-md-2">
-  <div className="card shadow-sm border rounded p-3">
-    <h6 className="mb-3 text-center">Pointure effets</h6>
+  <div className="card shadow-lg border rounded p-3">
+    <h6 className="mb-3 text-center">POINTURE EFFETS</h6>
 
     {/* Chemise / T-shirt */}
     <div className="mb-3">
@@ -747,6 +754,7 @@ const ElevePage = () => {
 
 
         </div>
+        <br></br>
 
         {/* Bouton pour afficher/masquer la section famille */}
         <div className="text-center mb-3">
@@ -757,7 +765,7 @@ const ElevePage = () => {
 
         {/* Informations de la Famille */}
         {showFamille && (
-          <div className="mt-4 border p-4">
+          <div className="mt-4 border p-5">
             <h4>INFORMATION SUR LES MEMBRES DE FAMILLE</h4>
 
             {/* Conjointe */}

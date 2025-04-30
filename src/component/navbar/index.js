@@ -1,28 +1,30 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import './Navbar.css';
 
 const Navbar = () => {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-      <div className="container-fluid">
-        <Link className="navbar-brand" to="/">Gestion Élève</Link>
-        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span className="navbar-toggler-icon"></span>
-        </button>
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto">
-            <li className="nav-item">
-              <Link className="nav-link active" aria-current="page" to="/">Accueil</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/eleve">Élève</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/assiduite">Assiduité</Link>
-            </li>
-          </ul>
-        </div>
+    <nav className={`navbar ${scrolled ? 'shrink' : ''}`}>
+      <div className="logo">
+        <Link to="/">GESTION ELEVE GENDARME</Link>
       </div>
+
+      <ul className="nav-links">
+        <li><Link to="/">Accueil</Link></li>
+        <li><Link to="/eleve">Élève</Link></li>
+        <li><Link to="/assiduite">Assiduité</Link></li>
+      </ul>
     </nav>
   );
 };
