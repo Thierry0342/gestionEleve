@@ -1,11 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import EleveService from '../../services/eleveService'; // ⚠️ Vérifie la casse exacte du fichier
-import ModalModificationEleve from '../EleveModifPage/EleveModifPage'; // ⚠️ Assure-toi que ce chemin est bon
+import ModalModificationEleve from '../EleveModifPage/EleveModifPage'; // 
+import Swal from 'sweetalert2';
 
 const ListeElevePge = () => {
   const [eleves, setEleves] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [eleveActif, setEleveActif] = useState(null);
+  //fonction delete
+  const handleDelete = (id) => {
+    Swal.fire({
+      title: 'Êtes-vous sûr ?',
+      text: "Cette action est irréversible !",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Oui, supprimer',
+      cancelButtonText: 'Annuler'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        EleveService.delete(id)
+          .then(() => {
+            setEleves(prev => prev.filter(e => e.id !== id));
+            Swal.fire('Supprimé !', 'L\'élève a été supprimé.', 'success');
+          })
+          .catch(error => {
+            console.error("Erreur lors de la suppression :", error);
+            Swal.fire('Erreur', 'Impossible de supprimer cet élève.', 'error');
+          });
+      }
+    });
+  };
+  
+  
 
   useEffect(() => {
     EleveService.get()
@@ -18,49 +46,56 @@ const ListeElevePge = () => {
         // ➕ Données fictives ici si l'API échoue
         const fakeEleves = [
           {
-            numCandidature: 'c14ml',
+     id :'',
+     numCandidature: 'c14ml',
     numIncorporation: '498',
-    escadron: '8',
-    peloton: '5',
+    escadron: '5',
+    peloton: '1',
+    diplomes:['CEPE','Licence'],
+    filiereDoctorat: 'informatique', 
+    filiereMasterOne: '', 
+    filiereLicence: 'informatique', 
     centreConcours: 'ambositra',
-    genreConcours: 'ordinaire',
-    SpecialisteAptitude: 'informatique',
+    genreConcours: 'specialiste',
+    SpecialisteAptitude: 'medecine',
+    niveauEtude :'master one',
     nom: 'rakotomalala',
     prenom: 'thierry',
     dateNaissance: '19/10/2000',
     lieuNaissance: 'fianarantsoa',
     cin: '203011065856',
-    dateDelivrance: '',
-    lieuDelivrance: '',
+    dateDelivrance: '2025-05-09',
+    lieuDelivrance: 'ambositra',
     duplicata: '',
-    sports:'',
+    sports:'Football',
     loisir:'',
-    religion:'',
-    specialite:'',
+    religion:'EKAR',
+    specialite:'informatique',
     niveau:'',
-    groupeSanguin:'',
-    tailleChemise: "",
-    tourTete: "",
-    pointurePantalon: "",
-    pointureChaussure: "",
-    relationsGenantes: "",
+    groupeSanguin:'A+',
+    tailleChemise: "L",
+    tourTete: "55",
+    pointurePantalon: "42",
+    pointureChaussure: "43",
+    relationsGenantes: "toliara",
     famille: {
-      conjointe: { nom: '', prenom: '', adresse: '', phone: '' },
-      pere: { nom: '', prenom: '', adresse: '', phone: '' },
+      conjointe: { nom: 'tiana', prenom: '', adresse: 'lot amboay', phone: '0344049829' },
+      pere: { nom: 'gaston', prenom: '', adresse: 'lot amboay', phone: '0345869865' },
       mere: { nom: '', prenom: '', adresse: '', phone: '' },
       contact: { nom: '', adresse: '', phone: '' },
       enfants: [
-        { nom: '', prenom: '', dateNaissance: '', sexe: '' },
+        { nom: 'zanako voalo', prenom: '', dateNaissance: '', sexe: '' },
+        { nom: 'zanako faharoa', prenom: '', dateNaissance: '', sexe: '' },
 
       ],
       soeur: [{ nom: '' }],
       frere: [{ nom: '' }],
     },
     image: "",
-    etatCivil: 'Divorce',
+    etatCivil: 'Celibataire',
     eleveTelephone: {
       telephone1: '0345588130',
-      telephone2: '',
+      telephone2: '0337906932',
       telephone3: '',
     },
     facebook: "",
@@ -128,14 +163,15 @@ const ListeElevePge = () => {
               <td>{eleve.matricule}</td>
               <td>
                 <button
+                name='btn modifie'
                   className="btn btn-warning btn-sm me-2"
-                  onClick={() => handleOpenModal(eleve)}
+                  onClick= { () => handleOpenModal(eleve) }
                 >
                   Modifier
                 </button>
                 <button
                   className="btn btn-danger btn-sm"
-                  onClick={() => console.log("Suppression pas encore implémentée")}
+                  onClick={() => handleDelete(eleve.id)}
                 >
                   Supprimer
                 </button>

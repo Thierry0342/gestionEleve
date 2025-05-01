@@ -10,10 +10,10 @@ class EleveService  {
         return axios.post(API_URL + "/eleves", data,);
     }
     put(id){
-        return axios.put(API_URL + "/pictures/" + id, [], );
+        return axios.put(API_URL + "/eleves/" + id, [], );
     }
     delete(id){
-        return axios.delete(API_URL + "/pictures/" + id, );
+        return axios.delete(API_URL + "/eleves/" + id, );
     }
 }
 
