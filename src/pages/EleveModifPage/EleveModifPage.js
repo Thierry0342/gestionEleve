@@ -6,18 +6,34 @@ import './style.css';
 const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
   //initie donne
   const [formData, setFormData] = useState({});
+  const [previewImage, setPreviewImage] = useState(""); // <== Aperçu de l'image
   useEffect(() => {
     if (eleve) {
       setFormData(eleve);
+      console.log(eleve);
+      if (eleve.image && typeof eleve.image === "string") {
+        setPreviewImage(eleve.image); // image par défaut de la BDD
+      }
     }
   }, [eleve]);
  
  // console.log(eleve.peloton)
  const [showFamille, setShowFamille] = useState(false); // Etat pour afficher/masquer la section famille
+ const [imagePreview, setImagePreview] = useState(''); // Pour afficher l'image sélectionnée
  
   
-
-
+  // Fonction pour gérer l'importation de l'image
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData(prev => ({
+        ...prev,
+        image: file, // on garde le fichier pour l'envoi
+      }));
+      setPreviewImage(URL.createObjectURL(file)); // aperçu immédiat
+    }
+  };
+  
   // Fonction pour mettre à jour les valeurs de téléphone
   const handlePhoneChange = (e, phoneKey) => {
     const newValue = e.target.value.replace(/\D/g, '').slice(0, 11); // Autorise seulement les chiffres, max 11 caractères
@@ -114,41 +130,33 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
   
     const { name, value, type, checked } = e.target;
   
-    if (name.startsWith('famille.enfants')) {
-      const field = name.split('.')[2];
-      const newEnfants = [...formData.famille.enfants];
-      newEnfants[index][field] = value;
+    if (name.startsWith('Enfants')) {
+      const newEnfants = [...formData.Enfants];
+      newEnfants[index]["Enfants"] = value;
   
       setFormData(prev => ({
-        ...prev,
-        famille: {
-          ...prev.famille,
-          enfants: newEnfants,
-        },
+        ...prev,enfants: newEnfants,
+        
       }));
-    } else if (name.startsWith('famille.soeur')) {
+    } 
+   
+    else if (name.startsWith('Soeurs')) {
       const field = name.split('.')[2];
-      const newSoeur = [...formData.famille.soeur];
-      newSoeur[index][field] = value;
+      const newSoeur = [...formData.Soeurs];
+      newSoeur[index]["Soeurs"] = value;
   
       setFormData(prev => ({
-        ...prev,
-        famille: {
-          ...prev.famille,
-          soeur: newSoeur,
-        },
+        ...prev,Soeur: newSoeur,
+        
       }));
-    } else if (name.startsWith('famille.frere')) {
+    } else if (name.startsWith('Freres')) {
       const field = name.split('.')[2];
-      const newFrere = [...formData.famille.frere];
-      newFrere[index][field] = value;
+      const newFrere = [...formData.Freres];
+      newFrere[index]["Freres"] = value;
   
       setFormData(prev => ({
-        ...prev,
-        famille: {
-          ...prev.famille,
-          frere: newFrere,
-        },
+        ...prev,Freres: newFrere,
+       
       }));
     } else if (name.startsWith('famille.')) {
       const path = name.split('.');
@@ -165,17 +173,14 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
     }
   
     // 🔹 Téléphones
-    else if (name.startsWith('eleveTelephone.')) {
-      const phoneKey = name.split('.')[1];
+    else if (['telephone1', 'telephone2', 'telephone3'].includes(name)) {
       const onlyDigits = value.replace(/\D/g, '').slice(0, 11);
       setFormData(prev => ({
         ...prev,
-        eleveTelephone: {
-          ...prev.eleveTelephone,
-          [phoneKey]: onlyDigits,
-        },
+        [name]: onlyDigits,
       }));
     }
+    
   
     // 🔹 Checkbox (par exemple etatCivil)
     else if (type === 'checkbox') {
@@ -193,7 +198,19 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
       }));
     }
   
-    // 🔹 Champs simples (nom, prenom, etc.)
+   
+    else if (name.includes('.')) {
+      const [parentKey, childKey] = name.split('.');
+      setFormData(prev => ({
+        ...prev,
+        [parentKey]: {
+          ...(prev[parentKey] || {}),
+          [childKey]: value,
+        },
+      }));
+    }    
+    
+     // 🔹 Champs simples (nom, prenom, etc.)
     else {
       setFormData(prev => ({
         ...prev,
@@ -216,7 +233,27 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
       </Modal.Header>
       <Modal.Body>
         <Form>
-          
+        <div className="col">
+  {/* Champ pour télécharger une nouvelle image */}
+  <input
+    type="file"
+    className="form-control"
+    name="image"
+    accept="image/*"
+    onChange={handleImageChange}
+  />
+</div>
+
+<div className="col mt-3">
+  {/* Aperçu de l'image actuelle ou modifiée */}
+  <img
+    src={previewImage || formData.image}
+    alt="Aperçu élève"
+    className="img-thumbnail"
+    style={{ width: "150px", height: "150px", objectFit: "cover" }}
+  />
+</div>
+
           <div className="row">
             {/* Colonne gauche : formulaire principal */}
             <div className="col-md-5">
@@ -227,7 +264,7 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                     <input type="text" className="form-control" name="numCandidature" placeholder="Numéro de candidature" value={eleve.numCandidature} onChange={onChange} />
                   </div>
                   <div className="col">
-                    <input type="text" className="form-control" name="numIncorporation" placeholder="Numéro d'incorporation" value={eleve.numIncorporation} onChange={onChange} />
+                    <input type="text" className="form-control" name="numeroIncorporation" placeholder="Numéro d'incorporation" value={eleve.numeroIncorporation} onChange={onChange} />
                   </div>
                 </div>
 
@@ -281,7 +318,7 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                     <label className="form-label">Spécialité :</label>
                     {['informatique', 'sport', 'infirmier'].map(speciality => (
                       <div className="form-check" key={speciality}>
-                        <input className="form-check-input" type="radio" name="specialite" value={speciality} checked={eleve.specialite === speciality} onChange={onChange} />
+                        <input className="form-check-input" type="radio" name="formData.specialite" value={speciality} checked={formData.specialite === speciality} onChange={onChange} />
                         <label className="form-check-label">{speciality.charAt(0).toUpperCase() + speciality.slice(1)}</label>
                       </div>
                     ))}
@@ -311,7 +348,7 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                 {/* Ligne 6 */}
                 <div className="row mb-3">
                   <div className="col">
-                    <input type="text" className="form-control" name="cin" placeholder="Numéro CIN" value={eleve.cin} onChange={onChange} />
+                    <input type="text" className="form-control" name="CIN" placeholder="Numéro CIN" value={eleve.CIN} onChange={onChange} />
                   </div>
                   <div className="col">
                     <input type="date" className="form-control" name="dateDelivrance" value={eleve.dateDelivrance} onChange={onChange} />
@@ -360,7 +397,7 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                       className="form-control"
                       placeholder={`Téléphone ${index + 1}`}
                       maxLength="11"
-                      value={eleve.eleveTelephone[phoneKey]}
+                      value={eleve[phoneKey]}
                       onChange={(e) => handlePhoneChange(e, phoneKey)}
                     />
                   ))}
@@ -446,9 +483,9 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
         <input
           className="form-check-input"
           type="radio"
-          name="groupeSanguin"
+          name="groupeSaguin"
           value={groupeSanguin}
-          checked={formData.groupeSanguin === groupeSanguin}
+          checked={formData.groupeSaguin === groupeSanguin}
           onChange={handleChange}
         />
         <label className="form-check-label">{groupeSanguin}</label>
@@ -463,72 +500,80 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
       <input
         type="text"
         className="form-control"
-        name="niveauEtude"
-        value={formData.niveauEtude}
+        name="niveau"
+        value={formData.niveau}
         onChange={handleChange}
       />
     </div>
 
  {/* Diplômes obtenus (checkbox) */}
-<div className="mb-3">
+ <div className="mb-3">
   <label className="form-label">Diplômes obtenus</label>
   <div className="d-flex flex-wrap gap-3">
-    {["CEPE", "BEPC", "BACC S", "BACC L", "Licence", "Master One", "Master Two", "Doctorat"].map((diplome) => (
-      <div className="form-check" key={diplome}>
+    {[
+      { label: "CEPE", key: "CEPE" },
+      { label: "BEPC", key: "BEPC" },
+      { label: "BACC S", key: "BACC_S" },
+      { label: "BACC L", key: "BACC_L" },
+      { label: "Licence", key: "Licence" },
+      { label: "Master One", key: "MasterOne" },
+      { label: "Master Two", key: "MasterTwo" },
+      { label: "Doctorat", key: "Doctorat" },
+    ].map(({ label, key }) => (
+      <div className="form-check" key={key}>
         <input
           className="form-check-input"
           type="checkbox"
-          name="diplomes"
-          value={diplome}
-          checked={formData.diplomes?.includes(diplome)}
+          name={`Diplome.${key}`}
+          checked={formData.Diplome?.[key] || false}
           onChange={(e) => {
             const checked = e.target.checked;
-            const value = e.target.value;
-            setFormData((prev) => {
-              const diplomes = new Set(prev.diplomes || []);
-              checked ? diplomes.add(value) : diplomes.delete(value);
-              return { ...prev, diplomes: Array.from(diplomes) };
-            });
+            setFormData((prev) => ({
+              ...prev,
+              Diplome: {
+                ...(prev.Diplome || {}),
+                [key]: checked,
+              },
+            }));
           }}
         />
-        <label className="form-check-label">{diplome}</label>
+        <label className="form-check-label">{label}</label>
       </div>
     ))}
   </div>
 </div>
 
+
 {/* Champs de filière selon le diplôme */}
-{["Licence", "Master One", "Master Two", "Doctorat"].map((niveau) =>
-  formData.diplomes?.includes(niveau) && (
-    <div className="mb-3" key={niveau}>
-      <label className="form-label">
-        Filière pour {niveau}
-      </label>
+{["Licence", "MasterOne", "MasterTwo", "Doctorat"].map((key) =>
+  formData.Diplome?.[key] && (
+    <div className="mb-3" key={key}>
+      <label className="form-label">Filière pour {key.replace(/([A-Z])/g, ' $1').trim()}</label>
       <input
         type="text"
         className="form-control"
-        name={`filiere${niveau.replace(/\s/g, '')}`} // ex: filiereMasterOne
-        value={formData[`filiere${niveau.replace(/\s/g, '')}`] || ""}
+        name={`filiere${key}`} // Ex : filiereMasterOne
+        value={formData.Filiere[`filiere${key}`] || ""}
         onChange={(e) =>
           setFormData((prev) => ({
             ...prev,
-            [`filiere${niveau.replace(/\s/g, '')}`]: e.target.value,
+            [`Filiere.filiere${key}`]: e.target.value,
           }))
         }
       />
     </div>
-    
   )
 )}
+
 
 <div className="mb-3">
   <label className="form-label">Relation(s) gênante(s)</label>
   <textarea
     className="form-control"
-    name="relationsGenantes"
+    name="relationGenante"
     rows="3"
     placeholder="Toerana tsy tokony hiasana ."
-    value={formData.relationsGenantes}
+    value={formData.relationGenante}
     onChange={handleChange}
   ></textarea>
     </div>
@@ -545,8 +590,8 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
       <label className="form-label">Chemise / T-shirt</label>
       <select
         className="form-select"
-        name="tailleChemise"
-        value={formData.tailleChemise}
+        name="Pointure.tailleChemise"
+        value={formData.Pointure?.tailleChemise || ""}
         onChange={handleChange}
       >
         <option value="">Choisir la taille</option>
@@ -565,8 +610,8 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
       <input
         type="number"
         className="form-control"
-        name="tourTete"
-        value={formData.tourTete}
+        name="Pointure.tourTete"
+        value={formData.Pointure?.tourTete || ""}
         onChange={handleChange}
         min="28"
         max="60"
@@ -579,8 +624,8 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
       <label className="form-label">Pointure pantalon</label>
       <select
         className="form-select"
-        name="pointurePantalon"
-        value={formData.pointurePantalon}
+        name="Pointure.pointurePantalon"
+        value={formData.Pointure?.PointurePantalon || ""}
         onChange={handleChange}
       >
         <option value="">Choisir</option>
@@ -596,7 +641,7 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
       <select
         className="form-select"
         name="pointureChaussure"
-        value={formData.pointureChaussure}
+        value={formData.Pointure?.pointureChaussure || ""}
         onChange={handleChange}
       >
         <option value="">Choisir</option>
@@ -630,9 +675,9 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                 <label className="form-label">Nom et Prénom Conjointe</label>
                 <input
                   type="text"
-                  name="famille.conjointe.nom"
+                  name="Conjointe.nom"
                   className="form-control"
-                  value={formData.famille.conjointe.nom}
+                  value={formData.Conjointe.nom}
                   onChange={handleChange}
                   placeholder="Nom et Prénom de la conjointe"
                 />
@@ -642,9 +687,9 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                 <label className="form-label">Téléphone</label>
                 <input
                   type="text"
-                  name="famille.conjointe.phone"
+                  name="Conjointe.phone"
                   className="form-control"
-                  value={formData.famille.conjointe.phone}
+                  value={formData.Conjointe.phone}
                   onChange={handleChange}
                   placeholder="Téléphone"
                 />
@@ -654,9 +699,9 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                 <label className="form-label">Adresse</label>
                 <input
                   type="text"
-                  name="famille.conjointe.adresse"
+                  name="Conjointe.adresse"
                   className="form-control"
-                  value={formData.famille.conjointe.adresse}
+                  value={formData.Conjointe.adresse}
                   onChange={handleChange}
                   placeholder="Adresse"
                 />
@@ -670,9 +715,9 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                 <label className="form-label">Nom et Prénom pére</label>
                 <input
                   type="text"
-                  name="famille.pere.nom"
+                  name="Pere.nom"
                   className="form-control"
-                  value={formData.famille.pere.nom}
+                  value={formData.Pere.nom}
                   onChange={handleChange}
                   placeholder="Nom et Prénom pére"
                 />
@@ -682,9 +727,9 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                 <label className="form-label">Téléphone</label>
                 <input
                   type="text"
-                  name="famille.pere.phone"
+                  name="Pere.phone"
                   className="form-control"
-                  value={formData.famille.pere.phone}
+                  value={formData.Pere.phone}
                   onChange={handleChange}
                   placeholder="Téléphone"
                 />
@@ -694,9 +739,9 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                 <label className="form-label">Adresse</label>
                 <input
                   type="text"
-                  name="famille.pere.adresse"
+                  name="Pere.adresse"
                   className="form-control"
-                  value={formData.famille.pere.adresse}
+                  value={formData.Pere.adresse}
                   onChange={handleChange}
                   placeholder="Adresse"
                 />
@@ -710,9 +755,9 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                 <label className="form-label">Nom et Prénom mére</label>
                 <input
                   type="text"
-                  name="famille.mere.nom"
+                  name="Mere.nom"
                   className="form-control"
-                  value={formData.famille.mere.nom}
+                  value={formData.Mere.nom}
                   onChange={handleChange}
                   placeholder="Nom et Prénom mere"
                 />
@@ -722,9 +767,9 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                 <label className="form-label">Téléphone</label>
                 <input
                   type="text"
-                  name="famille.mere.phone"
+                  name="Mere.phone"
                   className="form-control"
-                  value={formData.famille.mere.phone}
+                  value={formData.Mere.phone}
                   onChange={handleChange}
                   placeholder="Téléphone"
                 />
@@ -734,21 +779,21 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                 <label className="form-label">Adresse</label>
                 <input
                   type="text"
-                  name="famille.mere.adresse"
+                  name="Mere.adresse"
                   className="form-control"
-                  value={formData.famille.mere.adresse}
+                  value={formData.Mere.adresse}
                   onChange={handleChange}
                   placeholder="Adresse"
                 />
               </div>
             </div>
-            {formData.famille.enfants.map((enfant, index) => (
+            {formData.Enfants.map((enfant, index) => (
               <div key={index} className="row mb-5 align-items-end">
                 <div className="col-md-3">
                   <label className="form-label">Nom enfant {index + 1}</label>
                   <input
                     type="text"
-                    name="famille.enfants.nom"
+                    name="Enfants.nom"
                     className="form-control"
                     value={enfant.nom}
                     onChange={(e) => handleChange(e, index)}
@@ -759,7 +804,7 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                   <label className="form-label">Date de naissance</label>
                   <input
                     type="date"
-                    name="famille.enfants.dateNaissance"
+                    name="enfants.dateNaissance"
                     className="form-control"
                     value={enfant.dateNaissance}
                     onChange={(e) => handleChange(e, index)}
@@ -768,7 +813,7 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                 <div className="col-md-3">
                   <label className="form-label">Sexe</label>
                   <select
-                    name="famille.enfants.sexe"
+                    name="enfants.sexe"
                     className="form-select"
                     value={enfant.sexe}
                     onChange={(e) => handleChange(e, index)}
@@ -798,12 +843,12 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
 
             <div className="row mb-4">
               {/* Formulaire Frère */}
-              {formData.famille.frere.map((frere, index) => (
+              {formData.Freres.map((frere, index) => (
                 <div key={index} className="col-md-6">
                   <label className="form-label">Nom Frère {index + 1}</label>
                   <input
                     type="text"
-                    name={`famille.frere[${index}].nom`}
+                    name={`Freres[${index}].nom`}
                     className="form-control"
                     value={frere.nom}
                     onChange={(e) => handleChange(e, index, "frere")}
@@ -829,12 +874,12 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
               </button>
 
               {/* Formulaire Soeur */}
-              {formData.famille.soeur.map((soeur, index) => (
+              {formData.Soeurs.map((soeur, index) => (
                 <div key={index} className="col-md-6">
                   <label className="form-label">Nom Soeur {index + 1}</label>
                   <input
                     type="text"
-                    name={`famille.soeur[${index}].nom`}
+                    name={`Soeurs[${index}].nom`}
                     className="form-control"
                     value={soeur.nom}
                     onChange={(e) => handleChange(e, index, "soeur")}

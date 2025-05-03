@@ -7,6 +7,16 @@ const ListeElevePge = () => {
   const [eleves, setEleves] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [eleveActif, setEleveActif] = useState(null);
+  const [filter, setFilter] = useState({ escadron: '', peloton: '' });
+
+  const elevesAAfficher = filter.escadron === '' && filter.peloton === ''
+  ? eleves
+  : eleves.filter(eleve =>
+      (filter.escadron === '' || eleve.escadron === Number(filter.escadron)) &&
+      (filter.peloton === '' || eleve.peloton === Number(filter.peloton))
+    );
+
+  
   //fonction delete
   const handleDelete = (id) => {
     Swal.fire({
@@ -20,6 +30,7 @@ const ListeElevePge = () => {
       cancelButtonText: 'Annuler'
     }).then((result) => {
       if (result.isConfirmed) {
+        
         EleveService.delete(id)
           .then(() => {
             setEleves(prev => prev.filter(e => e.id !== id));
@@ -34,79 +45,20 @@ const ListeElevePge = () => {
   };
   
   
-
-  useEffect(() => {
-    EleveService.get()
-      .then(response => {
+// maka donne rehetra
+useEffect(() => {
+  EleveService.get()
+    .then(response => {
+      if (Array.isArray(response.data)) {
         setEleves(response.data);
-      })
-      .catch(error => {
-        console.error("Erreur lors du chargement des élèves :", error);
-
-        // ➕ Données fictives ici si l'API échoue
-        const fakeEleves = [
-          {
-     id :'',
-     numCandidature: 'c14ml',
-    numIncorporation: '498',
-    escadron: '5',
-    peloton: '1',
-    diplomes:['CEPE','Licence'],
-    filiereDoctorat: 'informatique', 
-    filiereMasterOne: '', 
-    filiereLicence: 'informatique', 
-    centreConcours: 'ambositra',
-    genreConcours: 'specialiste',
-    SpecialisteAptitude: 'medecine',
-    niveauEtude :'master one',
-    nom: 'rakotomalala',
-    prenom: 'thierry',
-    dateNaissance: '19/10/2000',
-    lieuNaissance: 'fianarantsoa',
-    cin: '203011065856',
-    dateDelivrance: '2025-05-09',
-    lieuDelivrance: 'ambositra',
-    duplicata: '',
-    sports:'Football',
-    loisir:'',
-    religion:'EKAR',
-    specialite:'informatique',
-    niveau:'',
-    groupeSanguin:'A+',
-    tailleChemise: "L",
-    tourTete: "55",
-    pointurePantalon: "42",
-    pointureChaussure: "43",
-    relationsGenantes: "toliara",
-    famille: {
-      conjointe: { nom: 'tiana', prenom: '', adresse: 'lot amboay', phone: '0344049829' },
-      pere: { nom: 'gaston', prenom: '', adresse: 'lot amboay', phone: '0345869865' },
-      mere: { nom: '', prenom: '', adresse: '', phone: '' },
-      contact: { nom: '', adresse: '', phone: '' },
-      enfants: [
-        { nom: 'zanako voalo', prenom: '', dateNaissance: '', sexe: '' },
-        { nom: 'zanako faharoa', prenom: '', dateNaissance: '', sexe: '' },
-
-      ],
-      soeur: [{ nom: '' }],
-      frere: [{ nom: '' }],
-    },
-    image: "",
-    etatCivil: 'Celibataire',
-    eleveTelephone: {
-      telephone1: '0345588130',
-      telephone2: '0337906932',
-      telephone3: '',
-    },
-    facebook: "",
-
-          },
-         
-        ];
-
-        setEleves(fakeEleves);
-      });
-  }, []);
+      } else {
+        console.error("Données inattendues :", response.data);
+      }
+    })
+    .catch(error => {
+      console.error("Erreur lors du chargement des élèves :", error);
+    });
+}, []);
 
   const handleOpenModal = (eleve) => {
     setEleveActif(eleve);
@@ -140,6 +92,35 @@ const ListeElevePge = () => {
   return (
     <div className="container mt-5">
       <h2>Liste des Élèves</h2>
+      <div className="row mb-3">
+  <div className="col">
+    <select
+      className="form-select"
+      name="escadron"
+      value={filter.escadron}
+      onChange={handleChange}
+    >
+      <option value="">Sélectionner un escadron</option>
+      {[...Array(10)].map((_, i) => (
+        <option key={i + 1} value={i + 1}>{i + 1}</option>
+      ))}
+    </select>
+  </div>
+  <div className="col">
+    <select
+      className="form-select"
+      name="peloton"
+      value={filter.peloton}
+      onChange={handleChange}
+    >
+      <option value="">Peloton</option>
+      {[1, 2, 3].map(p => (
+        <option key={p} value={p}>{p}</option>
+      ))}
+    </select>
+  </div>
+</div>
+
       <table className="table table-bordered table-striped">
         <thead>
           <tr>
@@ -147,27 +128,28 @@ const ListeElevePge = () => {
             <th>Prénom</th>
             <th>Escadron</th>
             <th>Peloton</th>
-            <th>Incorporation</th>
             <th>Matricule</th>
+            <th>Incorporation</th>
+            
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {eleves.map((eleve, index) => (
-            <tr key={index}>
-              <td>{eleve.nom}</td>
-              <td>{eleve.prenom}</td>
-              <td>{eleve.escadron}</td>
-              <td>{eleve.peloton}</td>
-              <td>{eleve.numIncorporation}</td>
-              <td>{eleve.matricule}</td>
-              <td>
+        {elevesAAfficher.map((eleve) => (
+            <tr key={eleve.id}>
+            <td>{eleve.nom}</td>
+           <td>{eleve.prenom}</td>
+           <td>{eleve.escadron}</td>
+          <td>{eleve.peloton}</td>
+          <td>{eleve.matricule}</td>
+          <td>{eleve.numeroIncorporation}</td>
+            <td>
                 <button
                 name='btn modifie'
                   className="btn btn-warning btn-sm me-2"
                   onClick= { () => handleOpenModal(eleve) }
                 >
-                  Modifier
+                  Afficher
                 </button>
                 <button
                   className="btn btn-danger btn-sm"

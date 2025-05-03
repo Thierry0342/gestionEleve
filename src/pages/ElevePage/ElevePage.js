@@ -5,10 +5,12 @@ import eleveService from '../../services/eleveService';
 const ElevePage = () => {
   const [formData, setFormData] = useState({
     numCandidature: '',
-    numIncorporation: '',
+    numeroIncorporation: '',
     escadron: '',
     peloton: '',
+    matricule :'',
     centreConcours: '',
+    specialiste:'',
     genreConcours: '',
     SpecialisteAptitude: '',
     nom: '',
@@ -16,44 +18,50 @@ const ElevePage = () => {
     filiereDoctorat: '', 
     filiereMasterOne: '', 
     filiereLicence: '', 
+    filiereMasterTwo:'',
     niveauEtude : '',
     prenom: '',
     dateNaissance: '',
     lieuNaissance: '',
-    cin: '',
+    CIN: '',
     dateDelivrance: '',
     lieuDelivrance: '',
     duplicata: '',
     sports:'',
     loisir:'',
     religion:'',
-    specialite:'',
     niveau:'',
     groupeSanguin:'',
-    tailleChemise: "",
-    tourTete: "",
-    pointurePantalon: "",
-    pointureChaussure: "",
-    relationsGenantes: "",
+    fady:'',
+    
+    relationsGenantes: "", 
+
+    pointure : {
+       tailleChemise: "",
+       tourTete: "",
+       pointurePantalon: "",
+       pointureChaussure: "",
+
+
+    },
     famille: {
       conjointe: { nom: '', prenom: '', adresse: '', phone: '' },
       pere: { nom: '', prenom: '', adresse: '', phone: '' },
       mere: { nom: '', prenom: '', adresse: '', phone: '' },
       contact: { nom: '', adresse: '', phone: '' },
       enfants: [
-        { nom: '', prenom: '', dateNaissance: '', sexe: '' },
-
+        { nom: '', prenom: '', dateNaissance: '', sexe: '' }
       ],
       soeur: [{ nom: '' }],
       frere: [{ nom: '' }],
     },
     image: "",
-    etatCivil: '',
-    eleveTelephone: {
+    situationFamiliale: '',
+    
       telephone1: '',
       telephone2: '',
       telephone3: '',
-    },
+    
     facebook: "",
 
 
@@ -214,7 +222,20 @@ const ElevePage = () => {
           },
         },
       }));
-    } else {
+      
+    }
+    else if (name.startsWith('pointure.')) {
+      const [section, field] = name.split('.');
+      setFormData(prev => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [field]: value,
+        }
+      }));
+    }
+     
+    else {
       setFormData(prevState => ({
         ...prevState,
         [name]: value,
@@ -280,7 +301,10 @@ const ElevePage = () => {
                 <input type="text" className="form-control" name="numCandidature" placeholder="Numéro de candidature" value={formData.numCandidature} onChange={handleChange} />
               </div>
               <div className="col">
-                <input type="text" className="form-control" name="numIncorporation" placeholder="Numéro d'incorporation" value={formData.numIncorporation} onChange={handleChange} />
+                <input type="text" className="form-control" name="numeroIncorporation" placeholder="Numéro d'incorporation" value={formData.numeroIncorporation} onChange={handleChange} />
+              </div>
+              <div className="col">
+                <input type="text" className="form-control" name="matricule" placeholder="Matricule" value={formData.matricule} onChange={handleChange} />
               </div>
             </div>
 
@@ -345,15 +369,15 @@ const ElevePage = () => {
               <div className="mb-3">
                 <label className="form-label">Spécialité :</label>
                 <div className="form-check">
-                  <input className="form-check-input" type="radio" name="specialite" value="informatique" onChange={handleChange} />
+                  <input className="form-check-input" type="radio" name="specialiste" value="informatique" onChange={handleChange} />
                   <label className="form-check-label">Informatique</label>
                 </div>
                 <div className="form-check">
-                  <input className="form-check-input" type="radio" name="specialite" value="sport" onChange={handleChange} />
+                  <input className="form-check-input" type="radio" name="specialiste" value="sport" onChange={handleChange} />
                   <label className="form-check-label">Sport</label>
                 </div>
                 <div className="form-check">
-                  <input className="form-check-input" type="radio" name="specialite" value="infirmier" onChange={handleChange} />
+                  <input className="form-check-input" type="radio" name="specialiste" value="infirmier" onChange={handleChange} />
                   <label className="form-check-label">Infirmier</label>
                 </div>
               </div>
@@ -382,7 +406,7 @@ const ElevePage = () => {
             {/* Ligne 6 */}
             <div className="row mb-3">
               <div className="col">
-                <input type="text" className="form-control" name="cin" placeholder="Numéro CIN" value={formData.cin} onChange={handleChange} />
+                <input type="text" className="form-control" name="CIN" placeholder="Numéro CIN" value={formData.CIN} onChange={handleChange} />
               </div>
               <div className="col">
                 <input type="date" className="form-control" name="dateDelivrance" value={formData.dateDelivrance} onChange={handleChange} />
@@ -406,10 +430,10 @@ const ElevePage = () => {
                   <input
                     className="form-check-input"
                     type="checkbox"
-                    name="etatCivil"
+                    name="situationFamiliale"
                     value="Celibataire"
-                    checked={formData.etatCivil === "Celibataire"}
-                    onChange={() => setFormData({ ...formData, etatCivil: "Celibataire" })}
+                    checked={formData.situationFamiliale === "Celibataire"}
+                    onChange={() => setFormData({ ...formData, situationFamiliale: "Celibataire" })}
                   />
                   <label className="form-check-label">
                     Célibataire
@@ -420,10 +444,10 @@ const ElevePage = () => {
                   <input
                     className="form-check-input"
                     type="checkbox"
-                    name="etatCivil"
+                    name="situationFamiliale"
                     value="Marie"
-                    checked={formData.etatCivil === "Marie"}
-                    onChange={() => setFormData({ ...formData, etatCivil: "Marie" })}
+                    checked={formData.situationFamiliale === "Marie"}
+                    onChange={() => setFormData({ ...formData, situationFamiliale: "Marie" })}
                   />
                   <label className="form-check-label">
                     Marié(e)
@@ -434,10 +458,10 @@ const ElevePage = () => {
                   <input
                     className="form-check-input"
                     type="checkbox"
-                    name="etatCivil"
+                    name="situationFamiliale"
                     value="Divorce"
-                    checked={formData.etatCivil === "Divorce"}
-                    onChange={() => setFormData({ ...formData, etatCivil: "Divorce" })}
+                    checked={formData.situationFamiliale === "Divorce"}
+                    onChange={() => setFormData({ ...formData, situationFamiliale: "Divorce" })}
                   />
                   <label className="form-check-label">
                     Divorcé(e)
@@ -452,16 +476,13 @@ const ElevePage = () => {
                 type="text"
                 className="form-control"
                 placeholder="Téléphone 1"
-                maxLength="11"
-                value={formData.eleveTelephone.telephone1}
+                maxLength="10"
+                value={formData.telephone1}
                 onChange={(e) => {
-                  const newValue = e.target.value.replace(/\D/g, '').slice(0, 11); // On autorise que les chiffres, 11 max
+                  const newValue = e.target.value.replace(/\D/g, '').slice(0, 10); // On autorise que les chiffres, 11 max
                   setFormData({
-                    ...formData,
-                    eleveTelephone: {
-                      ...formData.eleveTelephone,
-                      telephone1: newValue
-                    }
+                    ...formData,telephone1: newValue
+                    
                   });
                 }}
               />
@@ -471,15 +492,11 @@ const ElevePage = () => {
                 className="form-control"
                 placeholder="Téléphone 2"
                 maxLength="10"
-                value={formData.eleveTelephone.telephone2}
+                value={formData.telephone2}
                 onChange={(e) => {
                   const newValue = e.target.value.replace(/\D/g, '').slice(0, 11); // On autorise que les chiffres, 11 max
                   setFormData({
-                    ...formData,
-                    eleveTelephone: {
-                      ...formData.eleveTelephone,
-                      telephone2: newValue
-                    }
+                    ...formData,telephone2: newValue
                   });
                 }}
               />
@@ -488,21 +505,21 @@ const ElevePage = () => {
                 className="form-control"
                 placeholder="Téléphone 3"
                 maxLength="10"
-                value={formData.eleveTelephone.telephone3}
+                value={formData.telephone3}
                 onChange={(e) => {
                   const newValue = e.target.value.replace(/\D/g, '').slice(0, 11); // On autorise que les chiffres, 11 max
                   setFormData({
-                    ...formData,
-                    eleveTelephone: {
-                      ...formData.eleveTelephone,
-                      telephone3: newValue
-                    }
+                    ...formData,telephone3: newValue
+                    
                   });
                 }}
               />
             </div>
             <div className="col">
               <input type="text" className="form-control" name="facebook" placeholder="facebook" value={formData.facebook} onChange={handleChange} />
+            </div>
+            <div className="col">
+              <input type="text" className="form-control" name="fady" placeholder="fady" value={formData.fady} onChange={handleChange} />
             </div>
 
          </div>
@@ -531,7 +548,7 @@ const ElevePage = () => {
     <div className="mb-3">
   <label className="form-label">Sport(s) pratiqué(s)</label>
   <div className="d-flex flex-wrap gap-3">
-    {["Football", "Basketball", "Volley-ball", "Athlétisme", "Tennis", "Autre"].map((sport) => (
+    {["Football", "Basketball", "Volley-ball", "Athlétisme", "Tennis","arts martiaux", "Autre"].map((sport) => (
       <div className="form-check form-check-inline" key={sport}>
         <input
           className="form-check-input"
@@ -693,8 +710,8 @@ const ElevePage = () => {
       <label className="form-label">Chemise / T-shirt</label>
       <select
         className="form-select"
-        name="tailleChemise"
-        value={formData.tailleChemise}
+        name="pointure.tailleChemise"
+        value={formData.pointure.tailleChemise}
         onChange={handleChange}
       >
         <option value="">Choisir la taille</option>
@@ -713,8 +730,8 @@ const ElevePage = () => {
       <input
         type="number"
         className="form-control"
-        name="tourTete"
-        value={formData.tourTete}
+        name="pointure.tourTete"
+        value={formData.pointure.tourTete}
         onChange={handleChange}
         min="28"
         max="60"
@@ -727,8 +744,8 @@ const ElevePage = () => {
       <label className="form-label">Pointure pantalon</label>
       <select
         className="form-select"
-        name="pointurePantalon"
-        value={formData.pointurePantalon}
+        name="pointure.pointurePantalon"
+        value={formData.pointure.pointurePantalon}
         onChange={handleChange}
       >
         <option value="">Choisir</option>
@@ -743,8 +760,8 @@ const ElevePage = () => {
       <label className="form-label">Pointure chaussure</label>
       <select
         className="form-select"
-        name="pointureChaussure"
-        value={formData.pointureChaussure}
+        name="pointure.pointureChaussure"
+        value={formData.pointure.pointureChaussure}
         onChange={handleChange}
       >
         <option value="">Choisir</option>

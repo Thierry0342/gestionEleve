@@ -3,18 +3,18 @@ import { API_URL } from "../config/root/modules";
 //import { header } from "./Auth.services";
 class EleveService  {
     get(){
-        return axios.get(API_URL + "/eleves");
+        return axios.get(API_URL + "/api/eleve");
     }
    
     post(data){
-        return axios.post(API_URL + "/eleves", data,);
+        return axios.post(API_URL + "/api/eleve", data,);
     }
     put(id){
-        return axios.put(API_URL + "/eleves/" + id, [], );
+        return axios.put(API_URL + "/api/eleve/" + id, [], );
     }
-    delete(id){
-        return axios.delete(API_URL + "/eleves/" + id, );
-    }
+    delete(id) {
+        return axios.delete(`${API_URL}/api/eleve/${id}`);
+      }
 }
 
 export default new EleveService ()

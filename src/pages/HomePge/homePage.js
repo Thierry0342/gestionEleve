@@ -4,6 +4,10 @@ import { FaPersonBooth, FaFilter, FaIcons } from 'react-icons/fa'
 import { Link } from 'react-router-dom';
 
 import { Icon } from 'lucide-react';
+
+
+
+
 const HomePage = () => {
   return (
     <div style={{ marginLeft: "50px", marginTop: "100px" }}>
