@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import eleveService from '../../services/eleveService';
+import { useNavigate } from 'react-router-dom';
+
+import Swal from 'sweetalert2';
+
+
 
 const ElevePage = () => {
   const [formData, setFormData] = useState({
@@ -10,7 +15,7 @@ const ElevePage = () => {
     peloton: '',
     matricule :'',
     centreConcours: '',
-    specialiste:'',
+    Specialiste:'',
     genreConcours: '',
     SpecialisteAptitude: '',
     nom: '',
@@ -31,18 +36,14 @@ const ElevePage = () => {
     loisir:'',
     religion:'',
     niveau:'',
-    groupeSanguin:'',
+    groupeSaguin:'',
     fady:'',
-    
-    relationsGenantes: "", 
-
+    relationGenante: "", 
     pointure : {
        tailleChemise: "",
        tourTete: "",
        pointurePantalon: "",
        pointureChaussure: "",
-
-
     },
     famille: {
       conjointe: { nom: '', prenom: '', adresse: '', phone: '' },
@@ -66,7 +67,7 @@ const ElevePage = () => {
 
 
   });
-
+  const navigate = useNavigate();
   const [showFamille, setShowFamille] = useState(false); // Etat pour afficher/masquer la section famille
 
   const [imagePreview, setImagePreview] = useState(''); // Pour afficher l'image sélectionnée
@@ -153,21 +154,19 @@ const ElevePage = () => {
 
 
   // Fonction pour gérer l'importation de l'image
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+ const handleImageChange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    setFormData({ ...formData, image: file }); // Stocke directement le fichier (pas en base64)
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result); // Pour prévisualiser l'image
+    };
+    reader.readAsDataURL(file);
+  }
+};
 
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result); // Met à jour l'aperçu de l'image
-        setFormData({
-          ...formData,
-          image: file, // Stocke le fichier de l'image
-        });
-      };
-      reader.readAsDataURL(file); // Lecture du fichier comme URL
-    }
-  };
+  
   const handleChange = (e, index = null) => {
     const { name, value } = e.target;
 
@@ -245,15 +244,111 @@ const ElevePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    /*if (!formData.escadron || !formData.peloton) {
-      alert('Tous les champs obligatoires doivent être remplis!');
+
+    //change en json
+    const form = new FormData();
+
+    // Champs simples
+    form.append("numCandidature", formData.numCandidature);
+    form.append("numeroIncorporation", formData.numeroIncorporation);
+    form.append("escadron", formData.escadron);
+    form.append("peloton", formData.peloton);
+    form.append("matricule", formData.matricule);
+    form.append("centreConcours", formData.centreConcours);
+    form.append("Specialiste", formData.Specialiste);
+    form.append("genreConcours", formData.genreConcours);
+    form.append("SpecialisteAptitude", formData.SpecialisteAptitude);
+    form.append("nom", formData.nom);
+    form.append("filiereDoctorat", formData.filiereDoctorat);
+    form.append("filiereMasterOne", formData.filiereMasterOne);
+    form.append("filiereLicence", formData.filiereLicence);
+    form.append("filiereMasterTwo", formData.filiereMasterTwo);
+    form.append("niveauEtude", formData.niveauEtude);
+    form.append("prenom", formData.prenom);
+    form.append("dateNaissance", formData.dateNaissance);
+    form.append("lieuNaissance", formData.lieuNaissance);
+    form.append("CIN", formData.CIN);
+    form.append("dateDelivrance", formData.dateDelivrance);
+    form.append("lieuDelivrance", formData.lieuDelivrance);
+    form.append("duplicata", formData.duplicata);
+    form.append("loisir", formData.loisir);
+    form.append("religion", formData.religion);
+    form.append("niveau", formData.niveau);
+    form.append("groupeSaguin", formData.groupeSaguin);
+    form.append("fady", formData.fady);
+    form.append("relationGenante", formData.relationGenante);
+    form.append("situationFamiliale", formData.situationFamiliale);
+    form.append("telephone1", formData.telephone1);
+    form.append("telephone2", formData.telephone2);
+    form.append("telephone3", formData.telephone3);
+    form.append("facebook", formData.facebook);
+    
+    // Champs complexes (convertis en chaînes JSON)
+    form.append("pointure", JSON.stringify(formData.pointure));
+    form.append("famille", JSON.stringify(formData.famille));
+    form.append("diplomes", JSON.stringify(formData.diplomes)); // même si vide, important pour le backend
+    form.append("sports", JSON.stringify(formData.sports));
+    
+
+    // Image (DOIT correspondre à multer.single("image"))
+    if (formData.image) {
+      form.append("image", formData.image);
+    }
+    
+
+
+
+    if (!formData.escadron || !formData.peloton || !formData.CIN || !formData.numeroIncorporation || !formData.genreConcours) {
+  
+      Swal.fire({
+        title: 'Veuillez vérifier les champs',
+        text: "Les champs sont obligatoire !",
+        icon: 'error',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Retour',
+       
+      })
       return; // Ne pas soumettre si des champs sont vides
-    }*/
-    console.log('Formulaire soumis:', formData);
+    }
+
+
+
+    console.log('Formulaire soumis:', form);
 
     try {
-      const response = await eleveService.post(formData);
-      console.log('Élève créé avec succès:', response);
+      Swal.fire({
+        title: 'Êtes-vous sûr ?',
+        text: " Voullez vous ajouter ?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor:'#32CD32',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Oui, Ajouter',
+        cancelButtonText: 'Annuler'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          
+           eleveService.post(form)
+            .then(() => {
+    
+              Swal.fire('Ajouté!', 'L\'élève a été ajouté', 'success').then(() => {
+                navigate('/eleve/listeEleveGendarme'); // 
+              });
+            })
+            .catch(error => {
+              console.error("Erreur lors de l'enregistrement :", error);
+              Swal.fire("Une erreur s'est produite",'error')
+              
+              
+            });
+        }
+      });
+
+
+      //const response = await eleveService.post(formData);
+     // console.log('Élève créé avec succès:', response);
+
     } catch (error) {
       console.error('Erreur lors de l\'enregistrement de l\'élève:', error);
     }
@@ -369,17 +464,27 @@ const ElevePage = () => {
               <div className="mb-3">
                 <label className="form-label">Spécialité :</label>
                 <div className="form-check">
-                  <input className="form-check-input" type="radio" name="specialiste" value="informatique" onChange={handleChange} />
+                  <input className="form-check-input" type="radio" name="Specialiste" value="informatique" onChange={handleChange} />
                   <label className="form-check-label">Informatique</label>
                 </div>
                 <div className="form-check">
-                  <input className="form-check-input" type="radio" name="specialiste" value="sport" onChange={handleChange} />
-                  <label className="form-check-label">Sport</label>
+                  <input className="form-check-input" type="radio" name="Specialiste" value="telecomunication" onChange={handleChange} />
+                  <label className="form-check-label">telecomunication</label>
                 </div>
                 <div className="form-check">
-                  <input className="form-check-input" type="radio" name="specialiste" value="infirmier" onChange={handleChange} />
-                  <label className="form-check-label">Infirmier</label>
+                  <input className="form-check-input" type="radio" name="Specialiste" value="mecanicien" onChange={handleChange} />
+                  <label className="form-check-label">mecanicien automobile</label>
                 </div>
+                <div className="form-check">
+                  <input className="form-check-input" type="radio" name="Specialiste" value="infrastructure" onChange={handleChange} />
+                  <label className="form-check-label">infrastructure</label>
+                </div>
+                
+                <div className="form-check">
+                  <input className="form-check-input" type="radio" name="Specialiste" value="sport" onChange={handleChange} />
+                  <label className="form-check-label">Sport</label>
+                </div>
+                
               </div>
             )}
 
@@ -597,17 +702,17 @@ const ElevePage = () => {
     <div className="mb-3">
   <label className="form-label">Groupe sanguin</label>
   <div className="d-flex flex-wrap gap-3">
-    {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((groupeSanguin) => (
-      <div className="form-check form-check-inline" key={groupeSanguin}>
+    {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((groupeSaguin) => (
+      <div className="form-check form-check-inline" key={groupeSaguin}>
         <input
           className="form-check-input"
           type="radio"
-          name="groupeSanguin"
-          value={groupeSanguin}
-          checked={formData.groupeSanguin === groupeSanguin}
+          name="groupeSaguin"
+          value={groupeSaguin}
+          checked={formData.groupeSaguin === groupeSaguin}
           onChange={handleChange}
         />
-        <label className="form-check-label">{groupeSanguin}</label>
+        <label className="form-check-label">{groupeSaguin}</label>
       </div>
     ))}
   </div>
@@ -681,10 +786,10 @@ const ElevePage = () => {
   <label className="form-label">Relation(s) gênante(s)</label>
   <textarea
     className="form-control"
-    name="relationsGenantes"
+    name="relationGenante"
     rows="3"
     placeholder="Toerana tsy tokony hiasana ."
-    value={formData.relationsGenantes}
+    value={formData.relationGenante}
     onChange={handleChange}
   ></textarea>
 </div>

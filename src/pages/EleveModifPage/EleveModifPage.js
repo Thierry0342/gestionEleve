@@ -7,15 +7,44 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
   //initie donne
   const [formData, setFormData] = useState({});
   const [previewImage, setPreviewImage] = useState(""); // <== Aperçu de l'image
-  useEffect(() => {
-    if (eleve) {
-      setFormData(eleve);
-      console.log(eleve);
-      if (eleve.image && typeof eleve.image === "string") {
-        setPreviewImage(eleve.image); // image par défaut de la BDD
+ //initialise les donne 
+ useEffect(() => {
+  if (eleve) {
+    // Initialisation de base
+    setFormData(prev => {
+      const baseData = { ...eleve };
+
+      // Mapping des sports en true
+      if (eleve.Sport) {
+        const sportMapping = {
+          Football: "Football",
+          Basketball: "Basketball",
+          Volley_ball: "Volley-ball",
+          Athletisme: "Athlétisme",
+          Tennis: "Tennis",
+          ArtsMartiaux: "arts martiaux",
+          Autre: "Autre",
+        };
+
+        const selectedSports = Object.entries(sportMapping)
+          .filter(([key]) => eleve.Sport[key])
+          .map(([_, label]) => label);
+
+        baseData.sports = selectedSports;
       }
+
+      return baseData;
+    });
+
+    // Image de prévisualisation
+    if (eleve.image && typeof eleve.image === "string") {
+      setPreviewImage(eleve.image);
     }
-  }, [eleve]);
+
+    console.log(eleve);
+  }
+}, [eleve]);
+
  
  // console.log(eleve.peloton)
  const [showFamille, setShowFamille] = useState(false); // Etat pour afficher/masquer la section famille
@@ -26,13 +55,17 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData(prev => ({
-        ...prev,
-        image: file, // on garde le fichier pour l'envoi
-      }));
-      setPreviewImage(URL.createObjectURL(file)); // aperçu immédiat
+      setFormData(prev => ({ ...prev, image: file }));
+  
+      // Pour l'aperçu
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
+  
   
   // Fonction pour mettre à jour les valeurs de téléphone
   const handlePhoneChange = (e, phoneKey) => {
@@ -266,6 +299,9 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                   <div className="col">
                     <input type="text" className="form-control" name="numeroIncorporation" placeholder="Numéro d'incorporation" value={eleve.numeroIncorporation} onChange={onChange} />
                   </div>
+                  <div className="col">
+                <input type="text" className="form-control" name="matricule" placeholder="Matricule" value={eleve.matricule} onChange={onChange} />
+              </div>
                 </div>
 
                 {/* Ligne 2 */}
@@ -313,17 +349,34 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                 </div>
 
                 {/* Si spécialiste, afficher les choix */}
-                {eleve.genreConcours === 'specialiste' && (
-                  <div className="mb-3">
-                    <label className="form-label">Spécialité :</label>
-                    {['informatique', 'sport', 'infirmier'].map(speciality => (
-                      <div className="form-check" key={speciality}>
-                        <input className="form-check-input" type="radio" name="formData.specialite" value={speciality} checked={formData.specialite === speciality} onChange={onChange} />
-                        <label className="form-check-label">{speciality.charAt(0).toUpperCase() + speciality.slice(1)}</label>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {formData.genreConcours === 'specialiste' && (
+              <div className="mb-3">
+                <label className="form-label">Spécialité :</label>
+                <div className="form-check">
+                  <input className="form-check-input" type="radio" name="Specialiste" checked={formData.Specialiste === 'informatique'} value="informatique" onChange={handleChange} />
+                  <label className="form-check-label">Informatique</label>
+                </div>
+                <div className="form-check">
+                  <input className="form-check-input" type="radio" name="Specialiste" checked={formData.Specialiste === 'telecomunication'}  value="telecomunication" onChange={handleChange} />
+                  <label className="form-check-label">telecomunication</label>
+                </div>
+                <div className="form-check">
+                  <input className="form-check-input" type="radio" name="Specialiste" value="mecanicien" checked={formData.Specialiste === 'mecanicien'}  onChange={handleChange} />
+                  <label className="form-check-label">mecanicien automobile</label>
+                </div>
+                <div className="form-check">
+                  <input className="form-check-input" type="radio" name="Specialiste" value="infrastructure" checked={formData.Specialiste === 'infrastructure'}  onChange={handleChange} />
+                  <label className="form-check-label">infrastructure</label>
+                </div>
+                
+                <div className="form-check">
+                  <input className="form-check-input" type="radio" name="Specialiste" value="sport" checked={formData.Specialiste === 'sport'} onChange={handleChange} />
+                  <label className="form-check-label">Sport</label>
+                </div>
+              
+              </div>
+            )}
+
 
                 {/* Ligne 4 */}
                 <div className="row mb-3">
@@ -373,12 +426,12 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                       <input
                         className="form-check-input"
                         type="checkbox"
-                        name="etatCivil"
+                        name="situationFamiliale"
                         value={status}
-                        checked={eleve.etatCivil === status}
+                        checked={eleve.situationFamiliale === status}
                         onChange={() => onChange({
                           target: {
-                            name: 'etatCivil',
+                            name: 'situationFamiliale',
                             value: status
                           }
                         })}
@@ -429,7 +482,7 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
     <div className="mb-3">
   <label className="form-label">Sport(s) pratiqué(s)</label>
   <div className="d-flex flex-wrap gap-3">
-    {["Football", "Basketball", "Volley-ball", "Athlétisme", "Tennis", "Autre"].map((sport) => (
+    {["Football", "Basketball", "Volley-ball", "Athlétisme", "Tennis","arts martiaux", "Autre"].map((sport) => (
       <div className="form-check form-check-inline" key={sport}>
         <input
           className="form-check-input"
@@ -624,8 +677,8 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
       <label className="form-label">Pointure pantalon</label>
       <select
         className="form-select"
-        name="Pointure.pointurePantalon"
-        value={formData.Pointure?.PointurePantalon || ""}
+        name="PointurePantalon"
+        value={formData.Pointure?.pointurePantalon || ""}
         onChange={handleChange}
       >
         <option value="">Choisir</option>

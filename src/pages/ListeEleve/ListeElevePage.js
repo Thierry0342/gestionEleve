@@ -2,21 +2,22 @@ import React, { useEffect, useState } from 'react';
 import EleveService from '../../services/eleveService'; // ⚠️ Vérifie la casse exacte du fichier
 import ModalModificationEleve from '../EleveModifPage/EleveModifPage'; // 
 import Swal from 'sweetalert2';
+import DataTable from 'react-data-table-component';
+import ModalMatricule from '../../component//modalMatricule/ModalMatricule';
+import { data } from 'react-router-dom';
+
+
+//table 
+
+
+
 
 const ListeElevePge = () => {
   const [eleves, setEleves] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [eleveActif, setEleveActif] = useState(null);
-  const [filter, setFilter] = useState({ escadron: '', peloton: '' });
+  const [filter, setFilter] = useState({ escadron: '', peloton: '' ,search:''});
 
-  const elevesAAfficher = filter.escadron === '' && filter.peloton === ''
-  ? eleves
-  : eleves.filter(eleve =>
-      (filter.escadron === '' || eleve.escadron === Number(filter.escadron)) &&
-      (filter.peloton === '' || eleve.peloton === Number(filter.peloton))
-    );
-
-  
   //fonction delete
   const handleDelete = (id) => {
     Swal.fire({
@@ -51,6 +52,7 @@ useEffect(() => {
     .then(response => {
       if (Array.isArray(response.data)) {
         setEleves(response.data);
+        console.log("donne ve reto",data)
       } else {
         console.error("Données inattendues :", response.data);
       }
@@ -77,6 +79,11 @@ useEffect(() => {
       [name]: value
     }));
   };
+  //pour le filtre 
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilter(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleSave = async () => {
     try {
@@ -89,79 +96,119 @@ useEffect(() => {
     }
   };
 
+  
+ 
+  // Application du filtre
+const elevesAAfficher = eleves.filter(eleve => {
+  const escadronMatch = filter.escadron === '' || eleve.escadron === Number(filter.escadron);
+  const pelotonMatch = filter.peloton === '' || eleve.peloton === Number(filter.peloton);
+  const matchSearch = !filter.search || (
+    eleve.nom?.toLowerCase().includes(filter.search.toLowerCase()) ||
+    eleve.prenom?.toLowerCase().includes(filter.search.toLowerCase()) ||
+    eleve.numeroIncorporation?.toString().includes(filter.search)
+  );
+  // Si escadron sélectionné mais pas peloton → OK
+  // Si escadron + peloton → OK
+  // Si aucun → tout s’affiche
+  // Si peloton sélectionné mais escadron vide → on ignore peloton
+  if (filter.peloton !== '' && filter.escadron === '' && filter.search) {
+    return true; 
+  }
+
+  return escadronMatch && pelotonMatch && matchSearch;
+});
+const columns = [
+  { name: 'Nom', selector: row => row.nom, sortable: true },
+  { name: 'Prénom', selector: row => row.prenom, sortable: true },
+  { name: 'Escadron', selector: row => row.escadron, sortable :true},
+  { name: 'Peloton', selector: row => row.peloton },
+  { name: 'Matricule', selector: row => row.matricule} ,
+  { name: 'Incorporation', selector: row => row.numeroIncorporation },
+  {
+    name: 'Actions',
+    cell: row => (
+      <>
+        <button className="btn btn-warning btn-sm me-2" onClick={() => handleOpenModal(row)}>
+          View
+        </button>
+        <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)}>
+          Delete
+        </button>
+      </>
+    )
+  }
+];
+  
+
   return (
     <div className="container mt-5">
-      <h2>Liste des Élèves</h2>
-      <div className="row mb-3">
-  <div className="col">
-    <select
-      className="form-select"
-      name="escadron"
-      value={filter.escadron}
-      onChange={handleChange}
-    >
-      <option value="">Sélectionner un escadron</option>
-      {[...Array(10)].map((_, i) => (
-        <option key={i + 1} value={i + 1}>{i + 1}</option>
-      ))}
-    </select>
-  </div>
-  <div className="col">
-    <select
-      className="form-select"
-      name="peloton"
-      value={filter.peloton}
-      onChange={handleChange}
-    >
-      <option value="">Peloton</option>
-      {[1, 2, 3].map(p => (
-        <option key={p} value={p}>{p}</option>
-      ))}
-    </select>
+      <h2>Liste des Élèves Gendarmes</h2>
+      <div className="row justify-content-center mb-5">
+  <div className="col-md-6">
+    <div className="row g-2">
+      <div className="col-12">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Rechercher par nom, prénom ou incorporation"
+          name="search"
+          value={filter.search}
+          onChange={handleFilterChange}
+        />
+      </div>
+
+      <div className="col-6">
+        <select
+          className="form-select"
+          name="escadron"
+          value={filter.escadron}
+          onChange={handleFilterChange}
+        >
+          <option value="">Sélectionner un escadron</option>
+          {[...Array(10)].map((_, i) => (
+            <option key={i + 1} value={i + 1}>{i + 1}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="col-6">
+        <select
+          className="form-select"
+          name="peloton"
+          value={filter.peloton}
+          onChange={handleFilterChange}
+        >
+          <option value="">Peloton</option>
+          {[1, 2, 3].map(p => (
+            <option key={p} value={p}>{p}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="col-12">
+        <button
+          className="btn btn-secondary w-100"
+          onClick={() => setFilter({ escadron: '', peloton: '', search: '' })}
+        >
+          Réinitialiser le filtre
+        </button>
+      </div>
+    </div>
   </div>
 </div>
-
-      <table className="table table-bordered table-striped">
-        <thead>
-          <tr>
-            <th>Nom</th>
-            <th>Prénom</th>
-            <th>Escadron</th>
-            <th>Peloton</th>
-            <th>Matricule</th>
-            <th>Incorporation</th>
-            
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-        {elevesAAfficher.map((eleve) => (
-            <tr key={eleve.id}>
-            <td>{eleve.nom}</td>
-           <td>{eleve.prenom}</td>
-           <td>{eleve.escadron}</td>
-          <td>{eleve.peloton}</td>
-          <td>{eleve.matricule}</td>
-          <td>{eleve.numeroIncorporation}</td>
-            <td>
-                <button
-                name='btn modifie'
-                  className="btn btn-warning btn-sm me-2"
-                  onClick= { () => handleOpenModal(eleve) }
-                >
-                  Afficher
-                </button>
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={() => handleDelete(eleve.id)}
-                >
-                  Supprimer
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+             <DataTable
+                    columns={columns}
+                    data={elevesAAfficher}
+                    pagination
+                    paginationPerPage={50}
+                    paginationRowsPerPageOptions={[50, 100]}
+                    highlightOnHover
+                    striped
+                    noDataComponent="Aucun élève à afficher"
+                    customStyles={customStyles}
+                    
+                    
+                 />
 
       {eleveActif && (
         <ModalModificationEleve
@@ -175,5 +222,20 @@ useEffect(() => {
     </div>
   );
 };
+const customStyles = {
+  headCells: {
+    style: {
+      fontSize: '17px', // Taille du texte des en-têtes
+      fontWeight: 'bold',
+    },
+  },
+  cells: {
+    style: {
+      fontSize: '17px', // Taille du texte des cellules
+    },
+  },
+};
+
+
 
 export default ListeElevePge;
