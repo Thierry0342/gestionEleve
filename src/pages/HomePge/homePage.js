@@ -58,8 +58,8 @@ const HomePage = () => {
                 <h2 className="mb-4">
                   <i className="ti-filter text-primary"></i>
                 </h2>
-                <h6 className="card-title">DIVERS</h6>
-                <p>Normaliens MItory An-kira</p>
+                <h3 className="card-title">ABSENCE</h3>
+                <p>Absence au progression par les élèves gendarme</p>
               </div>
             </div>
           </div>

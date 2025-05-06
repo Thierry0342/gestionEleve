@@ -4,6 +4,7 @@ import Navbar from './component/navbar/index';
 import HomePage from './pages/HomePge/homePage'; 
 import ElevePage from './pages/ElevePage/ElevePage';
 import ListeElevePge from './pages/ListeEleve/ListeElevePage';
+import CourPage from './pages/CourPage/CourPage';
 
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/eleve" element={<ElevePage />} />
           <Route path="/eleve/listeEleveGendarme" element={<ListeElevePge />} />
+          <Route path="/admin/" element={<CourPage />} />
         
         </Routes>
       </div>

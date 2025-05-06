@@ -2,12 +2,17 @@
 import { Modal, Button, Form, Row, Col } from 'react-bootstrap';
 import React, { useState, useEffect } from 'react';
 import './style.css';
+import eleveService from '../../services/eleveService';
 
 const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
   //initie donne
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({})
   const [previewImage, setPreviewImage] = useState(""); // <== Aperçu de l'image
- //initialise les donne 
+  //affiche image 
+  const [showFullImage, setShowFullImage] = useState(false);
+
+ 
+  //initialise les donne 
  useEffect(() => {
   if (eleve) {
     // Initialisation de base
@@ -30,8 +35,11 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
           .filter(([key]) => eleve.Sport[key])
           .map(([_, label]) => label);
 
+         
         baseData.sports = selectedSports;
       }
+      console.log("basedata ve ee",baseData);
+   
 
       return baseData;
     });
@@ -79,183 +87,132 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
     });
     
   };
-  const ajouterEnfant = () => {
-    setFormData((prev) => ({
-      ...prev,
-      famille: {
-        ...prev.famille,
-        enfants: [...prev.famille.enfants, { nom: '', prenom: '', dateNaissance: '', sexe: '' }],
-      },
-    }));
-  };
-  //suprime formulaire efant 
-  const supprimerEnfant = (index) => {
-    setFormData((prevState) => {
-      const enfants = [...prevState.famille.enfants];
-      enfants.splice(index, 1); // Supprime l'enfant à l'index donné
 
-      return {
-        ...prevState,
-        famille: {
-          ...prevState.famille,
-          enfants,
-        },
-      };
-    });
-  };
-  // fomulaire soeur et frere
-  // Fonction pour ajouter un frère
-  const ajouterFrere = () => {
-    setFormData((prev) => ({
-      ...prev,
-      famille: {
-        ...prev.famille,
-        frere: [...prev.famille.frere, { nom: '', }],
-      },
-    }));
-  };
-  //suprim
 
-  // Fonction pour ajouter une soeur
-  const ajouterSoeur = () => {
-    setFormData((prev) => ({
-      ...prev,
-      famille: {
-        ...prev.famille,
-        soeur: [...prev.famille.soeur, { nom: '' }],
-      },
-    }));
-  };
-  //suprim
-  // Fonction pour supprimer un frère
-  const supprimerFrere = (index) => {
-    setFormData((prevState) => {
-      const frere = [...prevState.famille.frere];
-      frere.splice(index, 1); // Supprime l'enfant à l'index donné
-
-      return {
-        ...prevState,
-        famille: {
-          ...prevState.famille,
-          frere,
-        },
-      };
-    });
-  };
-  // Fonction pour supprimer une soeur
-  const supprimerSoeur = (index) => {
-    setFormData((prevState) => {
-      const soeur = [...prevState.famille.soeur];
-      soeur.splice(index, 1); // Supprime l'enfant à l'index donné
-
-      return {
-        ...prevState,
-        famille: {
-          ...prevState.famille,
-          soeur,
-        },
-      };
-    });
-  };
 
   const handleChange = (e, index = null) => {
-    if (!e?.target) return;
-  
-    const { name, value, type, checked } = e.target;
-  
-    if (name.startsWith('Enfants')) {
-      const newEnfants = [...formData.Enfants];
-      newEnfants[index]["Enfants"] = value;
-  
-      setFormData(prev => ({
-        ...prev,enfants: newEnfants,
-        
-      }));
-    } 
-   
-    else if (name.startsWith('Soeurs')) {
-      const field = name.split('.')[2];
-      const newSoeur = [...formData.Soeurs];
-      newSoeur[index]["Soeurs"] = value;
-  
-      setFormData(prev => ({
-        ...prev,Soeur: newSoeur,
-        
-      }));
-    } else if (name.startsWith('Freres')) {
-      const field = name.split('.')[2];
-      const newFrere = [...formData.Freres];
-      newFrere[index]["Freres"] = value;
-  
-      setFormData(prev => ({
-        ...prev,Freres: newFrere,
-       
-      }));
-    } else if (name.startsWith('famille.')) {
-      const path = name.split('.');
-      setFormData(prev => ({
+    const { name, value } = e.target;
+
+    if (name.startsWith('famille.enfants')) {
+      const field = name.split('.')[2]; // e
+      const newEnfants = [...formData.famille.enfants];
+      newEnfants[index][field] = value;
+
+      setFormData((prev) => ({
         ...prev,
         famille: {
           ...prev.famille,
+          enfants: newEnfants,
+        },
+      }));
+    }
+    else if (name.startsWith('famille.soeur')) {
+      const field = name.split('.')[2]; // 
+      const newSoeur = [...formData.famille.soeur];
+      newSoeur[index][field] = value;
+
+      setFormData((prev) => ({
+        ...prev,
+        famille: {
+          ...prev.famille,
+          soeur: newSoeur,
+        },
+      }));
+    }
+    else if (name.startsWith('famille.frere')) {
+      const field = name.split('.')[2]; // 
+      const newFrere = [...formData.famille.frere];
+      newFrere[index][field] = value;
+
+      setFormData((prev) => ({
+        ...prev,
+        famille: {
+          ...prev.famille,
+          frere: newFrere,
+        },
+      }));
+    }
+    else if (name.startsWith('famille.')) {
+      const path = name.split('.');
+      setFormData(prevState => ({
+        ...prevState,
+        famille: {
+          ...prevState.famille,
           [path[1]]: {
-            ...prev.famille[path[1]],
+            ...prevState.famille[path[1]],
             [path[2]]: value,
           },
         },
       }));
+      
     }
-  
-    // 🔹 Téléphones
-    else if (['telephone1', 'telephone2', 'telephone3'].includes(name)) {
-      const onlyDigits = value.replace(/\D/g, '').slice(0, 11);
+    else if (name.startsWith('Pointure.')) {
+      const [section, field] = name.split('.');
       setFormData(prev => ({
         ...prev,
-        [name]: onlyDigits,
+        [section]: {
+          ...prev[section],
+          [field]: value,
+        }
       }));
     }
-    
-  
-    // 🔹 Checkbox (par exemple etatCivil)
-    else if (type === 'checkbox') {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
-  
-    // 🔹 Conversion peloton en nombre
-    else if (name === 'peloton' || name === 'escadron') {
-      setFormData(prev => ({
-        ...prev,
-        [name]: Number(value),
-      }));
-    }
-  
-   
-    else if (name.includes('.')) {
-      const [parentKey, childKey] = name.split('.');
-      setFormData(prev => ({
-        ...prev,
-        [parentKey]: {
-          ...(prev[parentKey] || {}),
-          [childKey]: value,
-        },
-      }));
-    }    
-    
-     // 🔹 Champs simples (nom, prenom, etc.)
+     
     else {
-      setFormData(prev => ({
-        ...prev,
+      setFormData(prevState => ({
+        ...prevState,
         [name]: value,
       }));
     }
   };
+
   
    // Fonction pour basculer l'affichage de la section famille
    const toggleFamille = () => {
     setShowFamille(!showFamille);
   };
+  //envoie donne 
+  
+
+const handleSave = async () => {
+  try {
+    const formDataToSend = new FormData();
+
+    // Ne pas ajouter l'image dans cette boucle (elle sera ajoutée à part)
+    for (const key in formData) {
+      if (key !== "image" && formData[key] !== undefined && formData[key] !== null) {
+        // Pour les objets complexes
+        if (["famille", "diplomes", "sports","filiere"].includes(key)) {
+          formDataToSend.append(key, JSON.stringify(formData[key]));
+        } else {
+          formDataToSend.append(key, formData[key]);
+        }
+      }
+    }
+
+    // Ajouter l'image si présente
+    if (formData.image && typeof formData.image === "object") {
+      formDataToSend.append("image", formData.image);
+    }
+
+    // Appel du service avec les bonnes données
+    console.log("FormData avant envoi : ", formDataToSend);
+    const response = await eleveService.put(eleve.id, formDataToSend);
+    onClose();
+    
+    
+    if (response.status === 200) {
+      console.log("Élève mis à jour avec succès :", response.data);
+      // Tu peux fermer le modal ou rafraîchir la liste
+    } else {
+      console.error("Erreur lors de la mise à jour de l'élève");
+    }
+  } catch (error) {
+    console.error("Erreur serveur :", error);
+  }
+};
+
+  
+  
   
 
 
@@ -280,11 +237,13 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
 <div className="col mt-3">
   {/* Aperçu de l'image actuelle ou modifiée */}
   <img
-    src={previewImage || formData.image}
-    alt="Aperçu élève"
-    className="img-thumbnail"
-    style={{ width: "150px", height: "150px", objectFit: "cover" }}
-  />
+  src={previewImage || formData.image}
+  alt="Aperçu élève"
+  className="img-thumbnail"
+  style={{ width: "150px", height: "150px", objectFit: "cover", cursor: "pointer" }}
+  onClick={() => setShowFullImage(true)}
+/>
+
 </div>
 
           <div className="row">
@@ -319,7 +278,7 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                   <select
                    className="form-select"
                    name="peloton"
-                   value={eleve.peloton ?? ''}
+                   value={formData.peloton}
                    onChange={handleChange}
                   >
                   <option value="">Peloton</option>
@@ -677,7 +636,7 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
       <label className="form-label">Pointure pantalon</label>
       <select
         className="form-select"
-        name="PointurePantalon"
+        name="Pointure.pointurePantalon"
         value={formData.Pointure?.pointurePantalon || ""}
         onChange={handleChange}
       >
@@ -693,7 +652,7 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
       <label className="form-label">Pointure chaussure</label>
       <select
         className="form-select"
-        name="pointureChaussure"
+        name="Pointure.pointureChaussure"
         value={formData.Pointure?.pointureChaussure || ""}
         onChange={handleChange}
       >
@@ -840,6 +799,44 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                 />
               </div>
             </div>
+             {/* accident */}
+             <div className="row mb-3">
+              <div className="col-md-4">
+                <label className="form-label">A prevenir en cas d'accident</label>
+                <input
+                  type="text"
+                  name="Accident.nom"
+                  className="form-control"
+                  value={formData.Accident.nom}
+                  onChange={handleChange}
+                  placeholder="Nom "
+                />
+              </div>
+
+              <div className="col-md-4">
+                <label className="form-label">Téléphone</label>
+                <input
+                  type="text"
+                  name="Accident.phone"
+                  className="form-control"
+                  value={formData.Accident.phone}
+                  onChange={handleChange}
+                  placeholder="Téléphone"
+                />
+              </div>
+
+              <div className="col-md-4">
+                <label className="form-label">Adresse</label>
+                <input
+                  type="text"
+                  name="Accident.adresse"
+                  className="form-control"
+                  value={formData.Accident.adresse}
+                  onChange={handleChange}
+                  placeholder="Adresse"
+                />
+              </div>
+            </div>
             {formData.Enfants.map((enfant, index) => (
               <div key={index} className="row mb-5 align-items-end">
                 <div className="col-md-3">
@@ -853,47 +850,12 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                     placeholder="Nom"
                   />
                 </div>
-                <div className="col-md-3">
-                  <label className="form-label">Date de naissance</label>
-                  <input
-                    type="date"
-                    name="enfants.dateNaissance"
-                    className="form-control"
-                    value={enfant.dateNaissance}
-                    onChange={(e) => handleChange(e, index)}
-                  />
-                </div>
-                <div className="col-md-3">
-                  <label className="form-label">Sexe</label>
-                  <select
-                    name="enfants.sexe"
-                    className="form-select"
-                    value={enfant.sexe}
-                    onChange={(e) => handleChange(e, index)}
-                  >
-                    <option value="">Sélectionner</option>
-                    <option value="masculin">Masculin</option>
-                    <option value="féminin">Féminin</option>
-                  </select>
-                </div>
-                <div className="col-md-3 text-end">
-                  <button
-                    type="button"
-                    className="btn btn-outline-danger mt-4"
-                    onClick={() => supprimerEnfant(index)}
-                    title="Supprimer cet enfant"
-                  >
-                    🗑️
-                  </button>
-                </div>
+              
+               
               </div>
             ))}
 
-            {/* btn ajout formulaire enfant*/}
-            <button type="button" className="btn btn-primary mb-3" onClick={ajouterEnfant}>
-              ENFANT
-            </button>
-
+           
             <div className="row mb-4">
               {/* Formulaire Frère */}
               {formData.Freres.map((frere, index) => (
@@ -907,24 +869,10 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                     onChange={(e) => handleChange(e, index, "frere")}
                     placeholder="Nom du frère"
                   />
-                  <div className="text-end">
-                    <button
-                      type="button"
-                      className="btn btn-outline-danger mt-2"
-                      onClick={() => supprimerFrere(index)}
-                    >
-                      🗑️
-                    </button>
-                  </div>
+                  
                 </div>
               ))}
-              <button
-                type="button"
-                className="btn btn-outline-primary mt-4"
-                onClick={ajouterFrere}
-              >
-                FORMULAIRE FRERE
-              </button>
+              
 
               {/* Formulaire Soeur */}
               {formData.Soeurs.map((soeur, index) => (
@@ -938,24 +886,10 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
                     onChange={(e) => handleChange(e, index, "soeur")}
                     placeholder="Nom du soeur"
                   />
-                  <div className="text-end">
-                    <button
-                      type="button"
-                      className="btn btn-outline-danger mt-2"
-                      onClick={() => supprimerSoeur(index)}
-                    >
-                      🗑️
-                    </button>
-                  </div>
+                  
                 </div>
               ))}
-              <button
-                type="button"
-                className="btn btn-outline-primary mt-3"
-                onClick={ajouterSoeur}
-              >
-                FORMULAIRE SOEUR
-              </button>
+              
             </div>
 
 
@@ -967,16 +901,50 @@ const ModalModificationEleve = ({ show, onClose, eleve, onChange, onSave }) => {
 
           </div>
           {/*fin car */}
+          {showFullImage && (
+                <div
+                  style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "100vw",
+                    height: "100vh",
+                    backgroundColor: "rgba(0,0,0,0.8)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 9999,
+                  }}
+                  onClick={() => setShowFullImage(false)} // Ferme quand on clique en dehors
+                >
+                  <img
+                    src={previewImage || formData.image}
+                    alt="Aperçu en grand"
+                    style={{
+                      maxWidth: "90%",
+                      maxHeight: "90%",
+                      border: "5px solid white",
+                      borderRadius: "10px",
+                    }}
+                  />
+</div>
+)}
+
+          
           
 
         </Form>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={onClose}>Annuler</Button>
-        <Button variant="primary" onClick={onSave}>Enregistrer</Button>
+        <Button variant="primary" onClick={handleSave}>Modifier</Button>
       </Modal.Footer>
     </Modal>
+    
   );
+  
+  
 };
+
 
 export default ModalModificationEleve;

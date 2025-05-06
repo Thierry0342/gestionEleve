@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import eleveService from '../../services/eleveService';
 import { useNavigate } from 'react-router-dom';
+import courService from '../../services/courService';
 
 import Swal from 'sweetalert2';
 
@@ -13,6 +14,7 @@ const ElevePage = () => {
     numeroIncorporation: '',
     escadron: '',
     peloton: '',
+    cour:'',
     matricule :'',
     centreConcours: '',
     Specialiste:'',
@@ -55,6 +57,7 @@ const ElevePage = () => {
       ],
       soeur: [{ nom: '' }],
       frere: [{ nom: '' }],
+      accidents: { nom:'', adresse:'',phone:''},
     },
     image: "",
     situationFamiliale: '',
@@ -81,6 +84,41 @@ const ElevePage = () => {
       },
     }));
   };
+  //cour 
+  const [filter, setFilter] = useState({
+    cour: '',// 
+    // ajoute d'autres filtres ici si nécessaire
+  });
+  
+  const [coursList, setCoursList] = useState([]);
+  useEffect(() => {
+    const fetchCours = async () => {
+      try {
+        const res = await courService.getAll();
+        const coursData = res.data;
+  
+        // Trier par valeur décroissante
+        coursData.sort((a, b) => b.cour - a.cour);
+  
+        setCoursList(coursData);
+  
+        // Définir automatiquement le premier cours comme valeur par défaut
+        if (coursData.length > 0) {
+          setFormData(prev => ({
+            ...prev,
+            cour: coursData[0].cour,
+          }));
+        }
+  
+      } catch (err) {
+        console.error("Erreur lors du chargement des cours", err);
+      }
+    };
+  
+    fetchCours();
+  }, []);
+  
+  
   //suprime formulaire efant 
   const supprimerEnfant = (index) => {
     setFormData((prevState) => {
@@ -282,12 +320,14 @@ const ElevePage = () => {
     form.append("telephone2", formData.telephone2);
     form.append("telephone3", formData.telephone3);
     form.append("facebook", formData.facebook);
+    form.append("cour",formData.cour);
     
     // Champs complexes (convertis en chaînes JSON)
     form.append("pointure", JSON.stringify(formData.pointure));
     form.append("famille", JSON.stringify(formData.famille));
     form.append("diplomes", JSON.stringify(formData.diplomes)); // même si vide, important pour le backend
     form.append("sports", JSON.stringify(formData.sports));
+  
     
 
     // Image (DOIT correspondre à multer.single("image"))
@@ -333,6 +373,7 @@ const ElevePage = () => {
             .then(() => {
     
               Swal.fire('Ajouté!', 'L\'élève a été ajouté', 'success').then(() => {
+                console.log('Formulaire soumis:', form);
                 navigate('/eleve/listeEleveGendarme'); // 
               });
             })
@@ -363,6 +404,23 @@ const ElevePage = () => {
     <div className="container mt-5">
       <h2 className="text-center mb-4">ELEVE GENDARME</h2>
       <form onSubmit={handleSubmit}>
+             <div className="col-md-3">
+             <select
+                  className="form-select"
+                  name="cour"
+                  value={formData.cour}
+                  onChange={handleChange}
+                  required
+                >
+                 
+                  {coursList.map((item) => (
+                    <option key={item.id} value={item.cour}>
+                      {item.cour}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <br></br>
         <div className="col">
           {/* Champ pour télécharger l'image */}
           <input
@@ -370,6 +428,7 @@ const ElevePage = () => {
             className="form-control"
             name="image"
             onChange={handleImageChange}
+            required
           />
         </div>
 
@@ -379,7 +438,7 @@ const ElevePage = () => {
             src={imagePreview || 'logo192.png'} // Image par défaut si aucune image sélectionnée
             alt="Aperçu"
             className="img-thumbnail"
-            width="150"
+            width="200"
           />
         </div>
 
@@ -432,7 +491,7 @@ const ElevePage = () => {
                   name="peloton"
                   value={formData.peloton}
                   onChange={handleChange}
-                >
+                  >
                   <option value="">Peloton</option>
                   <option value="1">1</option>
                   <option value="2">2</option>
@@ -524,7 +583,7 @@ const ElevePage = () => {
                 <input type="text" className="form-control" name="lieuDelivrance" placeholder="Lieu de délivrance" value={formData.lieuDelivrance} onChange={handleChange} />
               </div>
               <div className="col">
-                <input type="text" className="form-control" name="duplicata" placeholder="Duplicata (si applicable)" value={formData.duplicata} onChange={handleChange} />
+                <input type="date" className="form-control" name="duplicata" placeholder="Duplicata (si applicable)" value={formData.duplicata} onChange={handleChange} />
               </div>
             </div>
             <div className="mb-3">
@@ -1013,6 +1072,44 @@ const ElevePage = () => {
                 />
               </div>
             </div>
+            {/* accident */}
+            <div className="row mb-3">
+              <div className="col-md-4">
+                <label className="form-label">A prevenir en cas d'accident</label>
+                <input
+                  type="text"
+                  name="famille.accidents.nom"
+                  className="form-control"
+                  value={formData.famille.accidents.nom}
+                  onChange={handleChange}
+                  placeholder="Nom "
+                />
+              </div>
+
+              <div className="col-md-4">
+                <label className="form-label">Téléphone</label>
+                <input
+                  type="text"
+                  name="famille.accidents.phone"
+                  className="form-control"
+                  value={formData.famille.accidents.phone}
+                  onChange={handleChange}
+                  placeholder="Téléphone"
+                />
+              </div>
+
+              <div className="col-md-4">
+                <label className="form-label">Adresse</label>
+                <input
+                  type="text"
+                  name="famille.accidents.adresse"
+                  className="form-control"
+                  value={formData.famille.accidents.adresse}
+                  onChange={handleChange}
+                  placeholder="Adresse"
+                />
+              </div>
+            </div>
             {formData.famille.enfants.map((enfant, index) => (
               <div key={index} className="row mb-5 align-items-end">
                 <div className="col-md-3">
@@ -1026,29 +1123,7 @@ const ElevePage = () => {
                     placeholder="Nom"
                   />
                 </div>
-                <div className="col-md-3">
-                  <label className="form-label">Date de naissance</label>
-                  <input
-                    type="date"
-                    name="famille.enfants.dateNaissance"
-                    className="form-control"
-                    value={enfant.dateNaissance}
-                    onChange={(e) => handleChange(e, index)}
-                  />
-                </div>
-                <div className="col-md-3">
-                  <label className="form-label">Sexe</label>
-                  <select
-                    name="famille.enfants.sexe"
-                    className="form-select"
-                    value={enfant.sexe}
-                    onChange={(e) => handleChange(e, index)}
-                  >
-                    <option value="">Sélectionner</option>
-                    <option value="masculin">Masculin</option>
-                    <option value="féminin">Féminin</option>
-                  </select>
-                </div>
+              
                 <div className="col-md-3 text-end">
                   <button
                     type="button"
