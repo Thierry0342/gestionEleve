@@ -4,6 +4,10 @@ import eleveService from '../../services/eleveService';
 import courService from '../../services/courService';
 import absenceService from '../../services/absence-service';
 import DataTable from 'react-data-table-component';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { format } from 'date-fns';
+
 
 const SaisieAbsence = () => {
 
@@ -12,12 +16,14 @@ const SaisieAbsence = () => {
   const [incorporation, setIncorporation] = useState('');
   const [eleveData, setEleveData] = useState({});
   const [cour, setCour] = useState([]);
+  const [cour2, setCour2] = useState([]);
   const [motif, setMotif] = useState('');
   const [date,setDate]=useState('');
   const [absences, setAbsences] = useState([]);
   const [coursList, setCoursList] = useState([]);
+  const [coursList2, setCoursList2] = useState([]);
   const [listeAbsence, setListeAbsence] = useState([]);
-  const [filter, setFilter] = useState({ escadron: '', peloton: '' ,search:'' ,cour:''});
+  const [filter, setFilter] = useState({ escadron: '', peloton: '' ,search:'' ,cour:'',date:''});
   const [showTable, setShowTable] = useState(false);
   const [showModal, setShowModal] = useState(false);
   //pour spa
@@ -41,10 +47,12 @@ const SaisieAbsence = () => {
         coursData.sort((a, b) => b.cour - a.cour);
   
         setCoursList(coursData);
+        setCoursList2(coursData);
   
         // Définir automatiquement le premier cours comme valeur par défaut
         if (coursData.length > 0) {
             setCour(coursData[0].cour); 
+            setCour2(coursData[0].cour); 
         }
   
       } catch (err) {
@@ -134,7 +142,7 @@ const SaisieAbsence = () => {
       const response = await eleveService.getByInc(inc, cour);
       if (response.data) {
         setEleveData(response.data);  // Stocke les données récupérées
-        console.log(response.data)
+        console.log("reponse maka by incorportation"+eleveData)
       } else {
         console.log('Élève non trouvé');
           
@@ -147,20 +155,16 @@ const SaisieAbsence = () => {
   };
 
   useEffect(() => {
-    if (incorporation && cour) {
-      fetchEleveData(incorporation, cour);  // Passe à la fonction fetchEleveData
+    if (incorporation && cour2) {
+      fetchEleveData(incorporation, cour2);  // Passe à la fonction fetchEleveData
     }
-  }, [incorporation, cour]);
+  }, [incorporation, cour2]);
   //ajout absence 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
   
-    const dataToSend = {
-      eleveId: eleveData.eleve.id,
-      date,
-      motif,
-    };
-  
+    
     Swal.fire({
       title: 'Confirmer l\'enregistrement',
       text: 'Voulez-vous enregistrer cette absence ?',
@@ -172,6 +176,12 @@ const SaisieAbsence = () => {
       cancelButtonColor: '#d33'
     }).then((result) => {
       if (result.isConfirmed) {
+        //data to send
+        const dataToSend = {
+          eleveId: eleveData.eleve.id,
+          date,
+          motif,
+        };    
         absenceService.post(dataToSend)
           .then(response => {
             console.log('Absence enregistrée avec succès:', response.data);
@@ -215,16 +225,18 @@ const SaisieAbsence = () => {
               abs.Eleve.prenom?.toLowerCase().includes(filter.search.toLowerCase()) ||
               String(abs.Eleve.numeroIncorporation)?.includes(filter.search)
             );
+            const dateMatch = !filter.date || abs.date === filter.date;
+
 
             if (filter.peloton !== '' && filter.escadron === '' && filter.search) {
               return true;
             }
 
-            return escadronMatch && pelotonMatch && courMatch && matchSearch;
+            return escadronMatch && pelotonMatch && courMatch && matchSearch && dateMatch;
        });
 
       //pour le filtre 
-      console.log("Toutes les absences :", listeAbsence);
+      //console.log("Toutes les absences :", listeAbsence);
 
   const handleFilterChange = (e) => {
      const { name, value } = e.target;
@@ -248,18 +260,159 @@ const SaisieAbsence = () => {
   }, {});
   //ppour SPA 
   const handleAfficherIndispo = () => {
-    const motifsI = ["IG", "CONSULTATION", "A REVOIR IG", "REPOS SAN", "A REVOIR CHRR"];
+    const motifsI = ["IG", "CONSULTATION", "A REVOIR IG", "REPOS SAN"];
     
-    const total = absenceafficher.filter(abs => 
+    const totalIvalue = absenceafficher.filter(abs =>
       motifsI.includes(abs.motif?.toUpperCase()) &&
-      abs.date === spaDate
-    ).length;
-    const totalA = absenceafficher.filter(abs =>
-      !motifsI.includes(abs.motif?.toUpperCase())
+      abs.date === spaDate && cour===cour
     ).length;
   
-    setTotalI(total);
-    setTotalA(totalA);
+    const totalAvalue = absenceafficher.filter(abs =>
+      !motifsI.includes(abs.motif?.toUpperCase()) &&
+      abs.date === spaDate
+    ).length;
+  
+    setTotalI(totalIvalue);
+    setTotalA(totalAvalue);
+  };
+  // -----------------------------------------------
+  ///En pdf 
+  const handleExportPDF = () => {
+    try {
+      const doc = new jsPDF({ format: "a4" });
+      //change le date 
+      const formattedDate = format(new Date(spaDate), "d MMMM yyyy");
+      doc.setFontSize(11);
+      doc.setFont("TIMES NEW ROMAN");
+      doc.text("ECOLE DE LA GENDARMERIE NATIONALE", 5, 15);
+      doc.text("AMBOSITRA", 35, 22);
+      doc.text("----------------------", 32, 25);
+      doc.text("DIRECTION DE L'INSTRUCTION", 17, 32);
+      doc.text("----------------------", 32, 35);
+      doc.text("COUR DE FORMATION DES ELEVES GENDARME", 5, 42);
+      doc.text("-----------------------", 32, 45);
+      doc.text("REPOBLIKAN'I MADAGASCAR",150,15);
+      doc.text("Fitiavana - Tanindrazana - Fandrosoana",145,22);
+      doc.text("-----------------------", 165, 25);
+
+
+  
+      doc.setFontSize(12);
+      doc.text(`Situation de Prise d'Arme du ${filter.cour} CFEG du ${formattedDate} `, 90, 55);
+  
+      // Tableau résumé
+      autoTable(doc, {
+        startY: 60,
+        head: [['R', 'A', 'P', 'I', 'S']],
+        body: [[spaNumber, totalA, spaNumber - totalA, totalI, (spaNumber - totalA) - totalI]],
+        theme: 'grid',
+        tableWidth: 100,
+        margin: { left: doc.internal.pageSize.getWidth() - 120 },
+        styles: {
+          fontSize: 10,
+          halign: 'center',
+        },
+      });
+  
+      // Préparation des données détaillées, avec regroupement des absences par motif
+      const absencesDuJour = absenceafficher.filter(abs => abs.date === spaDate);
+  
+      // Motifs spécifiques à afficher après les autres
+      const specificMotifs = ["IG", "CONSULTATION", "A REVOIR IG", "REPOS SAN"];
+      
+      // Regroupement des absences par motif
+      const groupedMotifs = {};
+      absencesDuJour.forEach(abs => {
+        const motif = abs.motif?.toUpperCase() || "SANS MOTIF";
+        if (!groupedMotifs[motif]) groupedMotifs[motif] = [];
+        groupedMotifs[motif].push(abs);
+      });
+  
+      // Construction des lignes du tableau
+      let bodyDetails = [];
+  
+      // Ajout des autres motifs avant les motifs spécifiques
+      Object.entries(groupedMotifs).forEach(([motif, absences]) => {
+        if (!specificMotifs.includes(motif)) {
+          // Ligne de total pour le motif
+          bodyDetails.push([
+            `${motif} : ${absences.length}`,
+            '',
+            '',
+            '',
+            '',
+            ''
+          ]);
+
+          absences.forEach((abs, index) => {
+            bodyDetails.push([
+              '',
+              abs.Eleve?.nom || '',
+              abs.Eleve?.prenom || '',
+              abs.Eleve?.numeroIncorporation || '',
+              abs.Eleve?.escadron || '',
+              abs.Eleve?.peloton || '',
+            ]);
+          });
+  
+          
+        }
+      });
+  
+      // Ajout des motifs spécifiques après
+      specificMotifs.forEach(motif => {
+        if (groupedMotifs[motif]) {
+          bodyDetails.push([
+            `${motif} : ${groupedMotifs[motif].length}`,
+            '',
+            '',
+            '',
+            '',
+            ''
+          ]);
+          groupedMotifs[motif].forEach((abs, index) => {
+            bodyDetails.push([
+              '',
+              abs.Eleve?.nom || '',
+              abs.Eleve?.prenom || '',
+              abs.Eleve?.numeroIncorporation || '',
+              abs.Eleve?.escadron || '',
+              abs.Eleve?.peloton || '',
+            ]);
+          });
+  
+          // Ligne de total pour le motif
+         
+        }
+      });
+  
+      // Tableau détaillé en bas
+      autoTable(doc, {
+        startY: doc.lastAutoTable.finalY + 10,
+        head: [['MOTIFS', 'NOM', 'PRENOM', 'NUM INC', 'ESC', 'PON']],
+        body: bodyDetails,
+        theme: 'striped',
+        styles: {
+          fontSize: 10,
+          halign: 'center',
+        },
+        headStyles: {
+          fontStyle: 'bold',
+          
+        },
+      });
+      const finalY = doc.lastAutoTable.finalY; 
+      doc.setFontSize(12);
+      doc.text("DESTINATAIRES", 5 , finalY + 10);
+      doc.text("- Monsieur le COLONEL ,",7, finalY + 17);
+      doc.text(" Commandant de l'Ecole de la Gendarmerie nationale ,",7,finalY+22);
+      doc.text("-AMBOSITRA-",70,finalY+28);
+      doc.text("EGNA/CAB",45,finalY+32);  
+      doc.save(`SPA_${spaDate}.pdf`);
+    } catch (error) {
+      console.error("Erreur lors de l'exportation du PDF :", error);
+      alert("Une erreur est survenue lors de la génération du PDF.");
+    }
   };
   
   
@@ -278,13 +431,13 @@ const SaisieAbsence = () => {
             <div className="mb-3">
               <label htmlFor="cour" className="form-label">Cours</label>
               <select
-                id="cour"
+                id="cour2"
                 className="form-select"
-                value={filter.cour}
-                onChange={handleFilterChange}
+                value={cour2}
+                onChange={(e) => setCour2(e.target.value)}
                 required
               >
-                 {coursList.map((item) => (
+                 {coursList2.map((item) => (
                     <option key={item.id} value={item.cour}>
                       {item.cour}
                     </option>
@@ -458,28 +611,42 @@ const SaisieAbsence = () => {
                       </div>
                     </form>
                    
-                      <div className="col-12">
-                      <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Rechercher par nom, prénom ou incorporation"
-                            name="search"
-                            value={filter.search}
-                            onChange={handleFilterChange}
-                      />
-                    </div>
-                    <br></br>                                                                 
-                      <DataTable
-                          columns={columns}
-                          data={absenceafficher}
-                          pagination
-                          paginationPerPage={50}
-                          paginationRowsPerPageOptions={[10,20,50, 100]}
-                          highlightOnHover
-                          striped
-                          noDataComponent="Aucun élève à afficher"
-                          customStyles={customStyles}
-                        />
+                    <div className="row mt-3">
+                              <div className="col-md-8">
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  placeholder="Rechercher par nom, prénom ou incorporation"
+                                  name="search"
+                                  value={filter.search}
+                                  onChange={handleFilterChange}
+                                />
+                              </div>
+                              <div className="col-md-4">
+                                <input
+                                  type="date"
+                                  className="form-control"
+                                  name="date"
+                                  value={filter.date}
+                                  onChange={handleFilterChange}
+                                />
+                              </div>
+
+
+                      
+                                  </div>
+                                  <br></br>                                                                 
+                                    <DataTable
+                                        columns={columns}
+                                        data={absenceafficher}
+                                        pagination
+                                        paginationPerPage={50}
+                                        paginationRowsPerPageOptions={[10,20,50, 100]}
+                                        highlightOnHover
+                                        striped
+                                        noDataComponent="Aucun élève à afficher"
+                                        customStyles={customStyles}
+                                      />
                                     <div className="d-flex justify-content-end gap-5 my-3">
                                         <button
                                           className="btn btn-info"
@@ -585,7 +752,8 @@ const SaisieAbsence = () => {
 
                                                 <div className="modal-footer d-flex justify-content-between">
                                                   <button className="btn btn-secondary" onClick={() => setShowModal(false)}>Fermer</button>
-                                                  <button className="btn btn-success">IMPRIMER</button>
+                                                  <button className="btn btn-success" onClick={handleExportPDF}>IMPRIMER</button>
+
                                                 </div>
                                               </div>
                                             </div>
