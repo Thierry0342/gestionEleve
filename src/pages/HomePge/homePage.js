@@ -49,7 +49,9 @@ const HomePage = () => {
         </div>
   
         <div className="col-sm-4 col-md-3 club_cc">
+        <Link to="/eleve/absence" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className="card mb-4 club_ca">
+            
             <div className="card-body">
               <div className="club_ao">
                 <i className="fas fa-music ico fa-2x"></i>
@@ -63,6 +65,7 @@ const HomePage = () => {
               </div>
             </div>
           </div>
+          </Link>
         </div>
       </div>
       <br></br>

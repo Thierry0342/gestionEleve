@@ -20,6 +20,11 @@ class EleveService  {
     delete(id) {
         return axios.delete(`${API_URL}/api/eleve/${id}`);
       }
+     getByInc(inc,cour){
+        return axios.get(API_URL + `/api/eleve/incorporation/${inc}?cour=${cour}`);
+
+
+      }
 }
 
 export default new EleveService ()

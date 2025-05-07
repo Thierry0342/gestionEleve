@@ -5,6 +5,8 @@ import HomePage from './pages/HomePge/homePage';
 import ElevePage from './pages/ElevePage/ElevePage';
 import ListeElevePge from './pages/ListeEleve/ListeElevePage';
 import CourPage from './pages/CourPage/CourPage';
+import NotFoundPage from './pages/NotFoundPage';
+import AbsencePage from './pages/AbsencePage/absencePage';
 
 
 function App() {
@@ -17,7 +19,8 @@ function App() {
           <Route path="/eleve" element={<ElevePage />} />
           <Route path="/eleve/listeEleveGendarme" element={<ListeElevePge />} />
           <Route path="/admin/" element={<CourPage />} />
-        
+          <Route path="/eleve/absence" element={<AbsencePage />} />
+          <Route path="*" element={<NotFoundPage />} /> 
         </Routes>
       </div>
     </Router>
