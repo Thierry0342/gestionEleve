@@ -7,6 +7,7 @@ import ListeElevePge from './pages/ListeEleve/ListeElevePage';
 import CourPage from './pages/CourPage/CourPage';
 import NotFoundPage from './pages/NotFoundPage';
 import AbsencePage from './pages/AbsencePage/absencePage';
+import CadrePage from './pages/cadrePage/cadrePage';
 
 
 function App() {
@@ -20,6 +21,8 @@ function App() {
           <Route path="/eleve/listeEleveGendarme" element={<ListeElevePge />} />
           <Route path="/admin/" element={<CourPage />} />
           <Route path="/eleve/absence" element={<AbsencePage />} />
+          <Route path="/cadre" element={<CadrePage />} />
+
           <Route path="*" element={<NotFoundPage />} /> 
         </Routes>
       </div>

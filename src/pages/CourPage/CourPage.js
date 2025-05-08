@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import courService from '../../services/courService';
-import userService from '../../services/userService'; // Assurez-vous que ce service existe
+import userService from '../../services/userService'; 
 import Swal from 'sweetalert2';
 
 const CourPage = () => {

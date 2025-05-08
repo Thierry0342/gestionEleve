@@ -181,7 +181,7 @@ const columns = [
           <div className="row g-2">
             <div className='col-12'>
             <div className="col-md-3">
-            <select
+              <select
                   className="form-select"
                   name="cour"
                   value={filter.cour}
@@ -248,7 +248,7 @@ const columns = [
                     </div>
                   </div>
                 </div>
-             <DataTable
+                <DataTable
                     columns={columns}
                     data={elevesAAfficher}
                     pagination
@@ -275,19 +275,19 @@ const columns = [
                   </div>
                     );
                    };
-                              const customStyles = {
-                                headCells: {
-                                  style: {
-                                    fontSize: '17px', // Taille du texte des en-têtes
-                                    fontWeight: 'bold',
-                                  },
-                                },
-                                cells: {
-                                  style: {
-                                    fontSize: '17px', // Taille du texte des cellules
-                                  },
-                                },
-                              };
+                                  const customStyles = {
+                                    headCells: {
+                                      style: {
+                                        fontSize: '17px', // Taille du texte des en-têtes
+                                        fontWeight: 'bold',
+                                      },
+                                    },
+                                    cells: {
+                                      style: {
+                                        fontSize: '17px', // Taille du texte des cellules
+                                      },
+                                    },
+                                  };
 
 
 

@@ -102,6 +102,7 @@ const HomePage = () => {
         </div>
   
         <div className="col-sm-4 col-md-3 club_cc">
+        <Link to="/cadre" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className="card mb-4 club_ca">
             <div className="card-body">
               <div className="club_ao">
@@ -112,7 +113,8 @@ const HomePage = () => {
                 <p>Règles et consignes de discipline</p>
               </div>
             </div>
-          </div>
+          </div>4
+          </Link>
         </div>
       </div>
 

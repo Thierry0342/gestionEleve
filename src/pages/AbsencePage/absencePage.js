@@ -415,9 +415,6 @@ const SaisieAbsence = () => {
     }
   };
   
-  
-
-
   return (
     <div className="container mt-5">
       <h2 className="text-center mb-4">SAISIE ABSENCE ELEVE GENDARME</h2>
