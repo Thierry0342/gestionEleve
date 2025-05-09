@@ -33,6 +33,7 @@ const HomePage = () => {
   
         <div className="col-sm-4 col-md-3 club_cc">
           <div className="card mb-4 club_ca">
+          <Link to="/eleve/consultation" style={{ textDecoration: 'none', color: 'inherit' }}>
             <div className="card-body">
               <div className="club_ao">
                 <i className="fas fa-music ico fa-2x"></i>
@@ -45,7 +46,9 @@ const HomePage = () => {
                 <p>Consultation medical externe</p>
               </div>
             </div>
+            </Link>
           </div>
+         
         </div>
   
         <div className="col-sm-4 col-md-3 club_cc">

@@ -8,6 +8,7 @@ import CourPage from './pages/CourPage/CourPage';
 import NotFoundPage from './pages/NotFoundPage';
 import AbsencePage from './pages/AbsencePage/absencePage';
 import CadrePage from './pages/cadrePage/cadrePage';
+import ConsultationPage from './pages/consultationPage/consultationPage'
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path="/admin/" element={<CourPage />} />
           <Route path="/eleve/absence" element={<AbsencePage />} />
           <Route path="/cadre" element={<CadrePage />} />
+          <Route path="/eleve/consultation" element={<ConsultationPage />} />
 
           <Route path="*" element={<NotFoundPage />} /> 
         </Routes>

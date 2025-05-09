@@ -18,6 +18,9 @@ const cadreService = {
    // Modifier un cadre existant
    update(id, cadreData) {
     return axios.put(`${API_URL}/api/cadre/${id}`, cadreData);
+  },
+  getbyMat(mat){
+    return axios.get(API_URL + `/api/cadre/${mat}`);
   }
   
 };
